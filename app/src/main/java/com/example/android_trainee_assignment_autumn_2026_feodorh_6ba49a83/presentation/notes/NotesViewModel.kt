@@ -24,16 +24,7 @@ class NotesViewModel @Inject constructor(
     fun loadNotes() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            // TODO: получить из репозитория
-            val dummyNotes = listOf(
-                Note(
-                    id = 1,
-                    title = "Первая заметка",
-                    content = "Содержимое...",
-                    createdAt = System.currentTimeMillis() - 86400000
-                ),
-                Note(id = 2, title = "Вторая заметка", content = null, createdAt = System.currentTimeMillis())
-            )
+            val notes =
             _state.update {
                 it.copy(
                     notes = dummyNotes,

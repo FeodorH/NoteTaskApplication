@@ -7,6 +7,7 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domai
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.repository.NoteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -20,6 +21,7 @@ class NoteRepositoryImpl @Inject constructor(
     override fun getNotesFlow(): Flow<List<Note>> {
         return noteDao.getAllNotes()
             .map { entities -> entities.map { it.toDomain() } }
+            .flowOn(Dispatchers.IO)
     }
 
     override suspend fun getNoteById(id: Long): Note? = withContext(Dispatchers.IO) {
@@ -34,7 +36,7 @@ class NoteRepositoryImpl @Inject constructor(
         noteDao.deleteNote(id)
     }
 
-    override suspend fun deleteAllNotes() {
+    override suspend fun deleteAllNotes() = withContext(Dispatchers.IO) {
         noteDao.deleteAll()
     }
 }
