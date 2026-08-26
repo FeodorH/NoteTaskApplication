@@ -2,7 +2,7 @@ package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.pres
 
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
 
-data class NotesUIState (
+data class NotesUiState (
     val notes: List<Note> = emptyList(),
     val searchQuery: String = "",
     val sortOrder: SortOrder = SortOrder.NEWEST,

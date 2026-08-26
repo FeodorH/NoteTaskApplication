@@ -3,7 +3,7 @@ package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.pres
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.NotesUIState
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.NotesUiState
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.SortOrder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +18,8 @@ class NotesViewModel @Inject constructor(
     // TODO add usecases
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(NotesUIState())
-    val state: StateFlow<NotesUIState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(NotesUiState())
+    val state: StateFlow<NotesUiState> = _state.asStateFlow()
 
     fun loadNotes() {
         viewModelScope.launch {

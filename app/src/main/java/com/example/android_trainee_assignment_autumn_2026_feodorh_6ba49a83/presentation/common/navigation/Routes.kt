@@ -12,4 +12,4 @@ object NotesScreen
 object SettingsScreen
 
 @Serializable
-object AddNoteScreen
+object ExchangeNoteScreen

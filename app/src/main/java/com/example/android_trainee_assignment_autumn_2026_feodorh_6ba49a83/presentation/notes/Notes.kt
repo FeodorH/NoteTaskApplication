@@ -50,7 +50,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.AddNoteScreen
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.ExchangeNoteScreen
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.SortOrder
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -60,7 +60,7 @@ import java.util.Locale
 @Composable
 fun Notes(
     navController: NavController,
-    viewModel: NotesViewModel = hiltViewModel<NotesViewModel>()
+    viewModel: NotesViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -93,7 +93,7 @@ fun Notes(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                navController.navigate(AddNoteScreen)
+                navController.navigate(ExchangeNoteScreen)
             }) {
                 Icon(Icons.Default.Add, contentDescription = "Создать заметку")
             }
