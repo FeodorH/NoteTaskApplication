@@ -50,7 +50,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.ExchangeNoteScreen
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.SortOrder
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -93,7 +92,7 @@ fun Notes(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                navController.navigate(ExchangeNoteScreen)
+                navController.navigate("edit_note/0")
             }) {
                 Icon(Icons.Default.Add, contentDescription = "Создать заметку")
             }
@@ -131,7 +130,11 @@ fun Notes(
                             note = note,
                             isDeleteMode = state.isDeleteMode,
                             onDelete = { viewModel.deleteNote(it) },
-                            onClick = { viewModel.onNoteClick(it) }
+                            onClick = {
+                                if(!state.isDeleteMode){
+                                    navController.navigate("edit_note/${note.id}")
+                                }
+                            }
                         )
                     }
                 }

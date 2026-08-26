@@ -30,13 +30,16 @@ class NoteRepositoryImpl @Inject constructor(
 
     override suspend fun saveNote(note: Note) = withContext(Dispatchers.IO) {
         noteDao.insertNote(note.toEntity())
+        Unit
     }
 
     override suspend fun deleteNote(id: Long) = withContext(Dispatchers.IO) {
         noteDao.deleteNote(id)
+        Unit
     }
 
     override suspend fun deleteAllNotes() = withContext(Dispatchers.IO) {
         noteDao.deleteAll()
+        Unit
     }
 }

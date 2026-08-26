@@ -15,7 +15,7 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.
     version = 1,
     exportSchema = true
 )
-@TypeConverters(Converters::class)
+//@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDAO
 

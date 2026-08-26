@@ -25,6 +25,12 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.prese
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.SavedStateHandle
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.repository.NoteRepository
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.CreateNoteUseCase
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNoteByIdUseCase
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +39,6 @@ fun ExchangeNote(
     viewModel: ExchangeNoteViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val context = LocalContext.current
 
     // Автовыход при сохранении
     LaunchedEffect(state.isSaved) {
@@ -95,7 +100,9 @@ fun ExchangeNote(
             // Поле заголовка
             OutlinedTextField(
                 value = state.title,
-                onValueChange = { viewModel.updateTitle(it) },
+                onValueChange = {
+                    viewModel.updateTitle(it)
+                    viewModel.clearError()},
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Заголовок") },
                 singleLine = true,
@@ -106,7 +113,9 @@ fun ExchangeNote(
             // Поле содержимого
             OutlinedTextField(
                 value = state.content,
-                onValueChange = { viewModel.updateContent(it) },
+                onValueChange = {
+                    viewModel.updateContent(it)
+                    viewModel.clearError()},
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp),
@@ -196,26 +205,41 @@ fun ExchangeNote(
         }
     }
 }
-
-@Preview
-@Composable
-private fun PreviewExchangeNote() {
-    val fakeViewModel = remember {
-        object : ExchangeNoteViewModel(SavedStateHandle()) {
-            override val state = MutableStateFlow(
-                ExchangeNoteUiState(
-                    title = "Тестовая заметка",
-                    content = "Это содержимое заметки для превью",
-                    imageUri = null
-                )
-            ).asStateFlow()
-        }
-    }
-
-    MaterialTheme {
-        ExchangeNote(
-            navController = rememberNavController(),
-            viewModel = fakeViewModel  // передаём мок
-        )
-    }
-}
+//
+//@Preview
+//@Composable
+//private fun PreviewExchangeNote() {
+//    val fakeRepository = object : NoteRepository {
+//        override fun getNotesFlow(): Flow<List<Note>> = flowOf(emptyList())
+//        override suspend fun getNoteById(id: Long): Note? = null
+//        override suspend fun saveNote(note: Note) { }
+//        override suspend fun deleteNote(id: Long) { }
+//        override suspend fun deleteAllNotes() { }
+//    }
+//
+//    val fakeGetNoteById = GetNoteByIdUseCase(fakeRepository)
+//    val fakeCreateNote = CreateNoteUseCase(fakeRepository)
+//
+//    val fakeViewModel = remember {
+//        object : ExchangeNoteViewModel(
+//            getNoteById = fakeGetNoteById,
+//            createNote = fakeCreateNote,
+//            savedStateHandle = SavedStateHandle()
+//        ) {
+//            override val state = MutableStateFlow(
+//                ExchangeNoteUiState(
+//                    title = "Тестовая заметка",
+//                    content = "Это содержимое заметки для превью",
+//                    imageUri = null
+//                )
+//            ).asStateFlow()
+//        }
+//    }
+//
+//    MaterialTheme {
+//        ExchangeNote(
+//            navController = rememberNavController(),
+//            viewModel = fakeViewModel
+//        )
+//    }
+//}

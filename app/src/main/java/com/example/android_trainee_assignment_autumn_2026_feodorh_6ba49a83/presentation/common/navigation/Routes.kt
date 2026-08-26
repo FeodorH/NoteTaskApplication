@@ -10,6 +10,3 @@ object NotesScreen
 
 @Serializable
 object SettingsScreen
-
-@Serializable
-object ExchangeNoteScreen

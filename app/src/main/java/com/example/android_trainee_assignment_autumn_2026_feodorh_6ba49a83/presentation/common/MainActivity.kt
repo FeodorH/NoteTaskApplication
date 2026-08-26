@@ -4,10 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.ExchangeNoteScreen
+import androidx.navigation.navArgument
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.NotesScreen
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.SettingsScreen
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.TaskScreen
@@ -40,8 +41,11 @@ class MainActivity : ComponentActivity() {
                     composable<SettingsScreen> {
                         Settings(navController = navController)
                     }
-                    composable<ExchangeNoteScreen>{
-                        ExchangeNote(navController = navController)
+                    composable(
+                        route = "edit_note/{noteId}",
+                        arguments = listOf(navArgument("noteId") { type = NavType.LongType })
+                    ) { backStackEntry ->
+                        ExchangeNote(navController = navController)  // без noteId
                     }
                 }
             }

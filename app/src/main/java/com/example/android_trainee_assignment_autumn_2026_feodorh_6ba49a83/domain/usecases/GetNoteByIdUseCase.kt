@@ -4,7 +4,7 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domai
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.repository.NoteRepository
 import javax.inject.Inject
 
-class GetNotesByIdUseCase @Inject constructor(
+class GetNoteByIdUseCase @Inject constructor(
     private val repository: NoteRepository
 ) {
     suspend operator fun invoke(id: Long): Note? = repository.getNoteById(id)
