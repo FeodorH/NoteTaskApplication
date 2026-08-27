@@ -34,6 +34,8 @@ class NotesViewModel @Inject constructor(
     // Внутренние флоу для быстрой фильтрации и поиска
     private val searchQueryFlow = MutableStateFlow("")
     private val sortOrderFlow = MutableStateFlow(SortOrder.NEWEST)
+    // Связь с View
+    val searchQuery: StateFlow<String> = searchQueryFlow.asStateFlow()
 
     init {
         _state.update { it.copy(isLoading = true) }

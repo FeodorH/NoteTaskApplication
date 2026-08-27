@@ -50,6 +50,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.Routes
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.SortOrder
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -62,14 +63,14 @@ fun Notes(
     viewModel: NotesViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
 
     // Загружаем заметки при первом появлении
     LaunchedEffect(Unit) {
         viewModel.loadNotes()
     }
-
-    Scaffold(
-        topBar = {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
                 title = { Text("Заметки") },
                 actions = {
@@ -89,20 +90,12 @@ fun Notes(
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                navController.navigate("edit_note/0")
-            }) {
-                Icon(Icons.Default.Add, contentDescription = "Создать заметку")
-            }
-        }
-    ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
+
             OutlinedTextField(
-                value = state.searchQuery,
+                value = searchQuery,
                 onValueChange = { viewModel.updateSearchQuery(it) },
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(16.dp),
                 placeholder = { Text("Поиск") },
                 leadingIcon = { Icon(Icons.Default.Search, null) },
                 singleLine = true
@@ -131,14 +124,22 @@ fun Notes(
                             isDeleteMode = state.isDeleteMode,
                             onDelete = { viewModel.deleteNote(it) },
                             onClick = {
-                                if(!state.isDeleteMode){
-                                    navController.navigate("edit_note/${note.id}")
+                                if (!state.isDeleteMode) {
+                                    navController.navigate(Routes.editNote(note.id))
                                 }
                             }
                         )
                     }
                 }
             }
+        }
+        FloatingActionButton(
+            onClick = { navController.navigate(Routes.editNote(0L)) },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Создать заметку")
         }
     }
 }

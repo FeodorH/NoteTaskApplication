@@ -4,7 +4,6 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domai
 
 data class NotesUiState (
     val notes: List<Note> = emptyList(),
-    val searchQuery: String = "",
     val sortOrder: SortOrder = SortOrder.NEWEST,
     val isDeleteMode: Boolean = false,
     val isLoading: Boolean = false,
