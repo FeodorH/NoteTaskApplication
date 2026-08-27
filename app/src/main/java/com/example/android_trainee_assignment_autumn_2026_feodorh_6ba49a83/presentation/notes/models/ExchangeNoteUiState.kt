@@ -9,5 +9,6 @@ data class ExchangeNoteUiState(
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
     val errorMessage: String? = null,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val voiceState: VoiceState = VoiceState.IDLE,
 )

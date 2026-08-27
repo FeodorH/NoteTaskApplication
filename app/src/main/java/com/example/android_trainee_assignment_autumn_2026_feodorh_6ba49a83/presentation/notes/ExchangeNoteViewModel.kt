@@ -7,7 +7,11 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domai
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.CreateNoteUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNoteByIdUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.ExchangeNoteUiState
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceEvent
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceInputService
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.VoiceState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +23,7 @@ import javax.inject.Inject
 open class ExchangeNoteViewModel @Inject constructor(
     private val getNoteById: GetNoteByIdUseCase,
     private val createNote: CreateNoteUseCase,
+    private val voiceInputService: VoiceInputService,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -27,6 +32,9 @@ open class ExchangeNoteViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(ExchangeNoteUiState())
     open val state: StateFlow<ExchangeNoteUiState> = _state.asStateFlow()
+
+    // Джоба голосового ввода
+    private var voiceJob: Job? = null
 
     init {
         if (noteId != 0L) {
@@ -117,5 +125,66 @@ open class ExchangeNoteViewModel @Inject constructor(
 
     fun clearError() {
         _state.update { it.copy(errorMessage = null) }
+    }
+
+    fun startVoiceInput() {
+        if (voiceJob?.isActive == true) return
+
+        _state.update { it.copy(voiceState = VoiceState.RECORDING) }
+
+        voiceJob = viewModelScope.launch {
+            voiceInputService.startListening().collect { event ->
+                when (event) {
+                    is VoiceEvent.Ready -> {
+                        // можно не обновлять состояние
+                    }
+                    is VoiceEvent.Listening -> {
+                        _state.update { it.copy(voiceState = VoiceState.RECORDING) }
+                    }
+                    is VoiceEvent.PartialResult -> {
+                        // можно показать промежуточный текст, если нужно
+                    }
+                    is VoiceEvent.FinalResult -> {
+                        // Добавляем распознанный текст в поле содержимого
+                        val currentContent = _state.value.content
+                        val newContent = if (currentContent.isBlank()) {
+                            event.text
+                        } else {
+                            "$currentContent ${event.text}"//Реализация с пробелом
+                        }
+                        _state.update {
+                            it.copy(
+                                content = newContent,
+                                voiceState = VoiceState.IDLE
+                            )
+                        }
+                    }
+                    is VoiceEvent.Error -> {
+                        _state.update {
+                            it.copy(
+                                voiceState = VoiceState.IDLE,
+                                errorMessage = event.message
+                            )
+                        }
+                    }
+                    is VoiceEvent.Cancelled -> {
+                        _state.update { it.copy(voiceState = VoiceState.IDLE) }
+                    }
+                }
+            }
+        }
+    }
+
+    fun cancelVoiceInput() {
+        voiceInputService.stopListening()
+        voiceJob?.cancel()
+        voiceJob = null
+        _state.update { it.copy(voiceState = VoiceState.IDLE) }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        voiceInputService.stopListening()
+        voiceJob?.cancel()
     }
 }

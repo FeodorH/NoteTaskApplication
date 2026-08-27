@@ -3,9 +3,11 @@ package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.pres
 import android.Manifest
 import android.net.Uri
 import android.os.Build
+import android.speech.tts.Voice
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,13 +35,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.SavedStateHandle
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.repository.NoteRepository
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.AndroidVoiceInputService
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceEvent
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceInputService
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.CreateNoteUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNoteByIdUseCase
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.VoiceState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import java.io.File
 import java.text.SimpleDateFormat
@@ -110,6 +118,8 @@ fun ExchangeNote(
         }
     }
 
+    val recordAudioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+
     @Composable
     fun ErrorMessage(error: String?){
         Text(
@@ -145,8 +155,27 @@ fun ExchangeNote(
                     }
                 },
                 actions = {
-                    // Кнопка голосового ввода (будет позже)
-                    IconButton(onClick = { /* TODO: голосовой ввод */ }) {
+                    // Кнопка голосового ввода
+                    IconButton(modifier = Modifier.background(color =
+                        if(state.voiceState == VoiceState.IDLE){
+                            Color.White
+                        }else{
+                            Color.Black
+                        }
+                    ),
+                        onClick = {
+                            if (recordAudioPermissionState.status.isGranted) {
+                                viewModel.startVoiceInput()
+                            } else {
+                                recordAudioPermissionState.launchPermissionRequest()
+                            }
+
+                            if (state.voiceState == VoiceState.IDLE){
+                                viewModel.startVoiceInput()
+                            }else{
+                                viewModel.cancelVoiceInput()
+                            }
+                    }) {
                         Icon(Icons.Default.Mic, contentDescription = "Голосовой ввод")
                     }
                 }
@@ -307,6 +336,11 @@ private fun PreviewExchangeNote() {
         override suspend fun deleteAllNotes() { }
     }
 
+    class FakeVoiceInputService : VoiceInputService {
+        override fun startListening(): Flow<VoiceEvent> = emptyFlow()
+        override fun stopListening() {}
+    }
+
     val fakeGetNoteById = GetNoteByIdUseCase(fakeRepository)
     val fakeCreateNote = CreateNoteUseCase(fakeRepository)
 
@@ -314,6 +348,7 @@ private fun PreviewExchangeNote() {
         object : ExchangeNoteViewModel(
             getNoteById = fakeGetNoteById,
             createNote = fakeCreateNote,
+            voiceInputService = FakeVoiceInputService(),
             savedStateHandle = SavedStateHandle()
         ) {
             override val state = MutableStateFlow(

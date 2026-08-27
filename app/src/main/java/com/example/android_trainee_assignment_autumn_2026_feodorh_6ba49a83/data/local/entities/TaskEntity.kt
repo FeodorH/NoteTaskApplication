@@ -1,0 +1,14 @@
+package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.entities
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Task
+
+@Entity(tableName = "tasks")
+data class TaskEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val title: String,
+    val isCompleted: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
+)
