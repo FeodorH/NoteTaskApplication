@@ -6,18 +6,22 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import android.content.Context
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.dao.NoteDAO
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.dao.TaskDAO
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.entities.NoteEntity
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.entities.TaskEntity
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.migration.MIGRATION_1_TO_2
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.util.Converters
 
 
 @Database(
-    entities = [NoteEntity::class],
-    version = 1,
+    entities = [NoteEntity::class, TaskEntity::class],
+    version = 2,
     exportSchema = true
 )
-//@TypeConverters(Converters::class)
+
 abstract class AppDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDAO
+    abstract fun taskDao(): TaskDAO
 
     companion object {
         @Volatile
@@ -29,7 +33,8 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "app_database"
-                ).build()
+                ).addMigrations(MIGRATION_1_TO_2)
+                    .build()
                 INSTANCE = instance
                 instance
             }

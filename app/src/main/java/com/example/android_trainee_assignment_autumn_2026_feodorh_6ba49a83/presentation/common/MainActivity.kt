@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -19,8 +18,8 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.prese
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.ExchangeNote
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.Notes
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.settings.Settings
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.tasks.Tasks
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.Androidtraineeassignmentautumn2026feodorh6ba49a83Theme
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.tasks.Tasks
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -3,6 +3,7 @@ package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data
 
 import android.content.Context
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.dao.NoteDAO
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.dao.TaskDAO
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.database.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -22,4 +23,7 @@ object DatabaseModule {
 
     @Provides
     fun provideNoteDao(db: AppDatabase): NoteDAO = db.noteDao()
+
+    @Provides
+    fun provideTaskDao(db: AppDatabase): TaskDAO = db.taskDao()
 }

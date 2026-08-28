@@ -46,12 +46,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.repository.NoteRepository
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceEvent
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceInputService
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.CreateNoteUseCase
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNoteByIdUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.Routes
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.SortOrder
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.Androidtraineeassignmentautumn2026feodorh6ba49a83Theme
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -211,10 +221,55 @@ private fun formatDate(timestamp: Long): String {
     return format.format(date)
 }
 
+// Фабрика для превью
+fun previewExchangeNoteViewModel(
+    noteId: Long = 1L,
+    existingNote: Note? = null
+): ExchangeNoteViewModel {
+    val fakeNote = existingNote ?: Note(
+        id = noteId,
+        title = "Тестовая заметка",
+        content = "Это содержимое заметки для превью.",
+        imageUri = null,
+        createdAt = System.currentTimeMillis()
+    )
+
+    val fakeRepository = object : NoteRepository {
+        override fun getNotesFlow(): Flow<List<Note>> = flowOf(listOf(fakeNote))
+        override suspend fun getNoteById(id: Long): Note? =
+            if (id == fakeNote.id) fakeNote else null
+        override suspend fun saveNote(note: Note) { /* ничего */ }
+        override suspend fun deleteNote(id: Long) { /* ничего */ }
+        override suspend fun deleteAllNotes() { /* ничего */ }
+    }
+
+    val fakeVoiceService = object : VoiceInputService {
+        override fun startListening(): Flow<VoiceEvent> = emptyFlow()
+        override fun stopListening() { /* ничего */ }
+    }
+
+    val getNoteById = GetNoteByIdUseCase(fakeRepository)
+    val createNote = CreateNoteUseCase(fakeRepository)
+
+    val savedStateHandle = SavedStateHandle().apply {
+        set("noteId", noteId)
+    }
+
+    return ExchangeNoteViewModel(
+        getNoteById = getNoteById,
+        createNote = createNote,
+        voiceInputService = fakeVoiceService,
+        savedStateHandle = savedStateHandle
+    )
+}
+
 @Preview
 @Composable
-private fun Preview(){
-    Notes(
-        rememberNavController()
-    )
+private fun PreviewExchangeNote() {
+    Androidtraineeassignmentautumn2026feodorh6ba49a83Theme {
+        ExchangeNote(
+            navController = rememberNavController(),
+            viewModel = previewExchangeNoteViewModel(noteId = 1L)
+        )
+    }
 }
