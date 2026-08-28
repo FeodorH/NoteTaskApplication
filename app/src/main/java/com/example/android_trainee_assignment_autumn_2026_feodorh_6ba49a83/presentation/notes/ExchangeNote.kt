@@ -39,8 +39,12 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domai
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceEvent
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceInputService
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.CreateNoteUseCase
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.DeleteAllNotesUseCase
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.DeleteNoteByIdUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNoteByIdUseCase
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNotesFlowUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.VoiceState
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.Androidtraineeassignmentautumn2026feodorh6ba49a83Theme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -325,46 +329,55 @@ fun ExchangeNote(
     }
 }
 
+// Фабрика для превью
+fun previewExchangeNoteViewModel(
+    noteId: Long = 1L,
+    existingNote: Note? = null
+): ExchangeNoteViewModel {
+    val fakeNote = existingNote ?: Note(
+        id = noteId,
+        title = "Тестовая заметка",
+        content = "Это содержимое заметки для превью.",
+        imageUri = null,
+        createdAt = System.currentTimeMillis()
+    )
+
+    val fakeRepository = object : NoteRepository {
+        override fun getNotesFlow(): Flow<List<Note>> = flowOf(listOf(fakeNote))
+        override suspend fun getNoteById(id: Long): Note? =
+            if (id == fakeNote.id) fakeNote else null
+        override suspend fun saveNote(note: Note) { /* ничего */ }
+        override suspend fun deleteNote(id: Long) { /* ничего */ }
+        override suspend fun deleteAllNotes() { /* ничего */ }
+    }
+
+    val fakeVoiceService = object : VoiceInputService {
+        override fun startListening(): Flow<VoiceEvent> = emptyFlow()
+        override fun stopListening() { /* ничего */ }
+    }
+
+    val getNoteById = GetNoteByIdUseCase(fakeRepository)
+    val createNote = CreateNoteUseCase(fakeRepository)
+
+    val savedStateHandle = SavedStateHandle().apply {
+        set("noteId", noteId)
+    }
+
+    return ExchangeNoteViewModel(
+        getNoteById = getNoteById,
+        createNote = createNote,
+        voiceInputService = fakeVoiceService,
+        savedStateHandle = savedStateHandle
+    )
+}
+
 @Preview
 @Composable
 private fun PreviewExchangeNote() {
-    val fakeRepository = object : NoteRepository {
-        override fun getNotesFlow(): Flow<List<Note>> = flowOf(emptyList())
-        override suspend fun getNoteById(id: Long): Note? = null
-        override suspend fun saveNote(note: Note) { }
-        override suspend fun deleteNote(id: Long) { }
-        override suspend fun deleteAllNotes() { }
-    }
-
-    class FakeVoiceInputService : VoiceInputService {
-        override fun startListening(): Flow<VoiceEvent> = emptyFlow()
-        override fun stopListening() {}
-    }
-
-    val fakeGetNoteById = GetNoteByIdUseCase(fakeRepository)
-    val fakeCreateNote = CreateNoteUseCase(fakeRepository)
-
-    val fakeViewModel = remember {
-        object : ExchangeNoteViewModel(
-            getNoteById = fakeGetNoteById,
-            createNote = fakeCreateNote,
-            voiceInputService = FakeVoiceInputService(),
-            savedStateHandle = SavedStateHandle()
-        ) {
-            override val state = MutableStateFlow(
-                ExchangeNoteUiState(
-                    title = "Тестовая заметка",
-                    content = "Это содержимое заметки для превью",
-                    imageUri = null
-                )
-            ).asStateFlow()
-        }
-    }
-
-    MaterialTheme {
+    Androidtraineeassignmentautumn2026feodorh6ba49a83Theme {
         ExchangeNote(
             navController = rememberNavController(),
-            viewModel = fakeViewModel
+            viewModel = previewExchangeNoteViewModel(noteId = 1L)
         )
     }
 }
