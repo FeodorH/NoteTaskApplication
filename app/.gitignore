@@ -1,1 +1,39 @@
-/build
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ IDEA / Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.vscode/
+
+# Build output
+app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+
+# Local configuration file (содержит секреты!)
+local.properties
+
+# Keystore files (если будут)
+*.jks
+*.keystore
+
+# Generated files
+**/build/
+**/generated/
+**/outputs/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Navigation editor
+.navigation/
