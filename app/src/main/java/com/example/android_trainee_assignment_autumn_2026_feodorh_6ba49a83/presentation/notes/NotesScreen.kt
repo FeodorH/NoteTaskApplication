@@ -49,7 +49,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.AppColorScheme
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.ThemeMode
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.repository.NoteRepository
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.CreateNoteUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.DeleteAllNotesUseCase
@@ -57,8 +59,8 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domai
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNoteByIdUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNotesFlowUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.Routes
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.theme.AppTheme
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.SortOrder
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.MainTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import java.text.SimpleDateFormat
@@ -259,7 +261,7 @@ fun previewNotesViewModel(): NotesViewModel {
 @Preview
 @Composable
 private fun PreviewNotesScreen() {
-    MainTheme {
+    AppTheme(ThemeMode.SYSTEM, AppColorScheme.Default ) {
         NotesScreen(
             navController = rememberNavController(),
             viewModel = previewNotesViewModel()

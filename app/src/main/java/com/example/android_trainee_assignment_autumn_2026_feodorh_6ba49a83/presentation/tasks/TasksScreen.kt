@@ -26,7 +26,9 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.dto.ModelsResponse
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.dto.TokenResponse
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.service.GigaChatServiceImpl
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.AppColorScheme
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Task
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.ThemeMode
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.repository.TaskRepository
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.GigaChatService
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceEvent
@@ -36,8 +38,8 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domai
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetTasksFlowUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GigaChatGenerateTaskUsingByVoiceUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.UpdateTaskStatusUseCase
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.theme.AppTheme
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.tasks.models.TaskFilter
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.MainTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -107,26 +109,46 @@ fun TasksScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Фильтры
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 TaskFilter.ALL.let { filter ->
                     FilterChip(
                         selected = state.filter == filter,
                         onClick = { viewModel.setFilter(filter) },
-                        label = { Text("Все") }
+                        label = { Text("Все") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
                 TaskFilter.ACTIVE.let { filter ->
                     FilterChip(
                         selected = state.filter == filter,
                         onClick = { viewModel.setFilter(filter) },
-                        label = { Text("Активные") }
+                        label = { Text("Активные") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
                 TaskFilter.COMPLETED.let { filter ->
                     FilterChip(
                         selected = state.filter == filter,
                         onClick = { viewModel.setFilter(filter) },
-                        label = { Text("Выполненные") }
+                        label = { Text("Выполненные") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
             }
@@ -305,7 +327,7 @@ fun previewTasksViewModel(): TasksViewModel {
 @Preview
 @Composable
 fun PreviewTasksScreen() {
-    MainTheme {
+    AppTheme(ThemeMode.SYSTEM, AppColorScheme.Default ) {
         TasksScreen(
             navController = rememberNavController(),
             viewModel = previewTasksViewModel()

@@ -1,6 +1,5 @@
 package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.settings
 
-import androidx.compose.material3.ColorScheme
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.AppColorScheme

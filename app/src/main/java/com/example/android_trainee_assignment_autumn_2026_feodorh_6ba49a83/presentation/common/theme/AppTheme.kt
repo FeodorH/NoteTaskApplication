@@ -25,15 +25,19 @@ fun AppTheme(
         darkColorScheme(
             primary = Color(colorScheme.primary),
             onPrimary = Color(colorScheme.onPrimary),
+            primaryContainer = Color(colorScheme.primaryContainer),
+            onPrimaryContainer = Color(colorScheme.onPrimaryContainer),
             secondary = Color(colorScheme.secondary),
-            onSecondary = Color(colorScheme.onSecondary),
+            onSecondary = Color(colorScheme.onSecondary)
         )
     } else {
         lightColorScheme(
             primary = Color(colorScheme.primary),
             onPrimary = Color(colorScheme.onPrimary),
+            primaryContainer = Color(colorScheme.primaryContainer),
+            onPrimaryContainer = Color(colorScheme.onPrimaryContainer),
             secondary = Color(colorScheme.secondary),
-            onSecondary = Color(colorScheme.onSecondary),
+            onSecondary = Color(colorScheme.onSecondary)
         )
     }
 

@@ -27,14 +27,16 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.R
 import androidx.lifecycle.SavedStateHandle
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.AppColorScheme
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.ThemeMode
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.repository.NoteRepository
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceEvent
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceInputService
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.CreateNoteUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNoteByIdUseCase
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.theme.AppTheme
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.VoiceState
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.MainTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -365,7 +367,7 @@ fun previewExchangeNoteViewModel(
 @Preview
 @Composable
 private fun PreviewExchangeNoteScreen() {
-    MainTheme {
+    AppTheme(ThemeMode.SYSTEM, AppColorScheme.Default ) {
         ExchangeNoteScreen(
             navController = rememberNavController(),
             viewModel = previewExchangeNoteViewModel(noteId = 1L)

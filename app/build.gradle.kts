@@ -38,6 +38,13 @@ android {
         compose = true
         buildConfig = true
     }
+
+    packaging {
+        resources {
+            pickFirsts.add("META-INF/AL2.0")
+            pickFirsts.add("META-INF/LGPL2.1")
+        }
+    }
 }
 
 dependencies {
@@ -103,7 +110,13 @@ dependencies {
     //androidTestImplementation(libs.mockk.android)
 
     implementation(libs.kotlinx.serialization.json)
+
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
+
+    implementation("com.alphacephei:vosk-android:0.3.45") {
+        exclude(group = "net.java.dev.jna", module = "jna")
+    }
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
 }
