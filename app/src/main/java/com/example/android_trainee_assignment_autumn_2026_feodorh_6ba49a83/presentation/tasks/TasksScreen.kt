@@ -2,13 +2,42 @@ package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.pres
 
 import android.Manifest
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +75,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
     ExperimentalPermissionsApi::class
 )
 @Composable
@@ -55,7 +85,7 @@ fun TasksScreen(
     viewModel: TasksViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val context = LocalContext.current
+    LocalContext.current
     val recordAudioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
 
     Scaffold(
@@ -162,6 +192,7 @@ fun TasksScreen(
                         CircularProgressIndicator()
                     }
                 }
+
                 state.errorMessage != null -> {
                     Text(
                         text = state.errorMessage!!,
@@ -169,11 +200,13 @@ fun TasksScreen(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
+
                 state.tasks.isEmpty() && !state.isAddingMode -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("Нет задач")
                     }
                 }
+
                 else -> {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         if (state.isAddingMode) {
@@ -226,7 +259,9 @@ fun TaskItem(
             )
             Text(
                 text = task.title,
-                modifier = Modifier.weight(1f).padding(start = 8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 8.dp),
                 fontWeight = FontWeight.Medium,
                 textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
                 color = if (task.isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -257,7 +292,9 @@ fun AddTaskItem(
             OutlinedTextField(
                 value = title,
                 onValueChange = onTitleChange,
-                modifier = Modifier.weight(1f).padding(start = 8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 8.dp),
                 placeholder = { Text("Введите название задачи") },
                 singleLine = true,
                 isError = title.isBlank() // можно добавить проверку при подтверждении
@@ -281,7 +318,7 @@ fun previewTasksViewModel(): TasksViewModel {
         override suspend fun deleteTask(id: Long) {}
         override suspend fun updateTaskStatus(id: Long, isCompleted: Boolean) {}
     }
-    val fakeGigaChatApi : GigaChatApi = object : GigaChatApi {
+    val fakeGigaChatApi: GigaChatApi = object : GigaChatApi {
         override suspend fun getToken(
             url: String,
             contentType: String,
@@ -309,10 +346,11 @@ fun previewTasksViewModel(): TasksViewModel {
         ): ChatResponse = ChatResponse(emptyList())
 
     }
-    val fakeGigaChatService : GigaChatService = GigaChatServiceImpl(fakeGigaChatApi)
+    val fakeGigaChatService: GigaChatService = GigaChatServiceImpl(fakeGigaChatApi)
     val fakeVoiceService = object : VoiceInputService {
         override fun startListening(): Flow<VoiceEvent> = emptyFlow()
-        override fun stopListening() { /* ничего */ }
+        override fun stopListening() { /* ничего */
+        }
     }
 
     val getTasksFlow = GetTasksFlowUseCase(fakeRepository)
@@ -321,13 +359,20 @@ fun previewTasksViewModel(): TasksViewModel {
     val updateTaskStatus = UpdateTaskStatusUseCase(fakeRepository)
     val generateTaskUsingByVoiceUseCase =
         GigaChatGenerateTaskUsingByVoiceUseCase(fakeGigaChatService)
-    return TasksViewModel(getTasksFlow, saveTask, deleteTask, updateTaskStatus, fakeVoiceService, generateTaskUsingByVoiceUseCase)
+    return TasksViewModel(
+        getTasksFlow,
+        saveTask,
+        deleteTask,
+        updateTaskStatus,
+        fakeVoiceService,
+        generateTaskUsingByVoiceUseCase
+    )
 }
 
 @Preview
 @Composable
 fun PreviewTasksScreen() {
-    AppTheme(ThemeMode.SYSTEM, AppColorScheme.Default ) {
+    AppTheme(ThemeMode.SYSTEM, AppColorScheme.Default) {
         TasksScreen(
             navController = rememberNavController(),
             viewModel = previewTasksViewModel()

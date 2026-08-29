@@ -113,16 +113,18 @@ class TasksViewModel @Inject constructor(
         voiceJob = viewModelScope.launch {
             voiceInputService.startListening().collect { event ->
                 when (event) {
-                    is VoiceEvent.Ready -> {  }
+                    is VoiceEvent.Ready -> {}
                     is VoiceEvent.Listening -> {
                         _state.update { it.copy(isRecording = true) }
                     }
-                    is VoiceEvent.PartialResult -> { }
+
+                    is VoiceEvent.PartialResult -> {}
                     is VoiceEvent.FinalResult -> {
                         _state.update { it.copy(isRecording = false) }
                         // Передаём распознанный текст в метод создания задачи
                         createTaskFromVoice(event.text)
                     }
+
                     is VoiceEvent.Error -> {
                         _state.update {
                             it.copy(
@@ -131,6 +133,7 @@ class TasksViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is VoiceEvent.Cancelled -> {
                         _state.update { it.copy(isRecording = false) }
                     }
@@ -156,7 +159,7 @@ class TasksViewModel @Inject constructor(
                 } else {
                     _state.update { it.copy(errorMessage = "Не удалось сгенерировать задачу") }
                 }
-            } catch (e: NullPointerException) {//TODO
+            } catch (e: NullPointerException) {
                 _state.update { it.copy(errorMessage = e.message ?: "Ошибка генерации") }
             } finally {
                 _state.update { it.copy(isLoading = false) }

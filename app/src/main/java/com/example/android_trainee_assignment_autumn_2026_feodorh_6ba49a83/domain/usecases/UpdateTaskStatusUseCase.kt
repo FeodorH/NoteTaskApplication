@@ -6,7 +6,7 @@ import javax.inject.Inject
 class UpdateTaskStatusUseCase @Inject constructor(
     private val repository: TaskRepository
 ) {
-    suspend operator fun invoke(id : Long, isFinished: Boolean){
-        repository.updateTaskStatus(id,isFinished)
+    suspend operator fun invoke(id: Long, isFinished: Boolean) {
+        repository.updateTaskStatus(id, isFinished)
     }
 }

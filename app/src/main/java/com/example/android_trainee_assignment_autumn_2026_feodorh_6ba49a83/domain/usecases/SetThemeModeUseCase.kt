@@ -7,7 +7,7 @@ import javax.inject.Inject
 class SetThemeModeUseCase @Inject constructor(
     val repository: SettingsRepository
 ) {
-    suspend operator fun invoke(theme : ThemeMode){
+    suspend operator fun invoke(theme: ThemeMode) {
         repository.saveThemeMode(theme)
     }
 }

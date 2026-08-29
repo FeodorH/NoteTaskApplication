@@ -30,7 +30,7 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<SettingsUiState>(SettingsUiState())
-    val settingsUiState : StateFlow<SettingsUiState> = _state.asStateFlow()
+    val settingsUiState: StateFlow<SettingsUiState> = _state.asStateFlow()
 
     // Загрузка настроек при старте
     init {
@@ -61,22 +61,26 @@ class SettingsViewModel @Inject constructor(
     fun resetSettings() {
         viewModelScope.launch {
             resetSettingsUseCase()
-            _state.update { it.copy(
-                themeMode = ThemeMode.SYSTEM,
-                colorScheme = AppColorScheme.Default,
-                balance = null,
-                isBalanceLoading = false,
-                error = null
-                ) }
+            _state.update {
+                it.copy(
+                    themeMode = ThemeMode.SYSTEM,
+                    colorScheme = AppColorScheme.Default,
+                    balance = null,
+                    isBalanceLoading = false,
+                    error = null
+                )
+            }
         }
     }
 
     fun loadBalance() {
         viewModelScope.launch {
-            _state.update { it.copy(
-                isBalanceLoading = true,
-                error = null
-            ) }
+            _state.update {
+                it.copy(
+                    isBalanceLoading = true,
+                    error = null
+                )
+            }
             try {
                 val result = getBalanceUseCase()
                 if (result != null) {

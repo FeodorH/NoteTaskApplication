@@ -8,13 +8,15 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 val MIGRATION_1_TO_2 = object : Migration(1, 2) {
     override fun migrate(database: SupportSQLiteDatabase) {
 
-        database.execSQL("""
+        database.execSQL(
+            """
             CREATE TABLE IF NOT EXISTS tasks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 title TEXT NOT NULL,
                 isCompleted INTEGER NOT NULL DEFAULT 0,
                 createdAt INTEGER NOT NULL
             )
-        """)
+        """
+        )
     }
 }

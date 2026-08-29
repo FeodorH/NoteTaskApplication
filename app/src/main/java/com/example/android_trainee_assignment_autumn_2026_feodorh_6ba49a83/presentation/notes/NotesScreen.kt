@@ -112,13 +112,17 @@ fun NotesScreen(
             }
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize()
-            .padding(paddingValues)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
 
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { viewModel.updateSearchQuery(it) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(16.dp),
                 placeholder = { Text("Поиск") },
                 leadingIcon = { Icon(Icons.Default.Search, null) },
@@ -230,16 +234,36 @@ private fun formatDate(timestamp: Long): String {
 // Фабрика для превью
 fun previewNotesViewModel(): NotesViewModel {
     val fakeNotes = listOf(
-        Note(id = 1, title = "Купить молоко", content = "Не забыть про скидку", createdAt = System.currentTimeMillis() - 86_400_000),
-        Note(id = 2, title = "Позвонить маме", content = "Поздравить с днём рождения", createdAt = System.currentTimeMillis() - 172_800_000),
-        Note(id = 3, title = "Сделать уроки", content = "Математика, физика", createdAt = System.currentTimeMillis() - 259_200_000)
+        Note(
+            id = 1,
+            title = "Купить молоко",
+            content = "Не забыть про скидку",
+            createdAt = System.currentTimeMillis() - 86_400_000
+        ),
+        Note(
+            id = 2,
+            title = "Позвонить маме",
+            content = "Поздравить с днём рождения",
+            createdAt = System.currentTimeMillis() - 172_800_000
+        ),
+        Note(
+            id = 3,
+            title = "Сделать уроки",
+            content = "Математика, физика",
+            createdAt = System.currentTimeMillis() - 259_200_000
+        )
     )
     val fakeRepository = object : NoteRepository {
         override fun getNotesFlow(): Flow<List<Note>> = flowOf(fakeNotes)
         override suspend fun getNoteById(id: Long): Note? = fakeNotes.find { it.id == id }
-        override suspend fun saveNote(note: Note) { /* ничего не делаем */ }
-        override suspend fun deleteNote(id: Long) { /* ничего */ }
-        override suspend fun deleteAllNotes() { /* ничего */ }
+        override suspend fun saveNote(note: Note) { /* ничего не делаем */
+        }
+
+        override suspend fun deleteNote(id: Long) { /* ничего */
+        }
+
+        override suspend fun deleteAllNotes() { /* ничего */
+        }
     }
     val getNotesFlow = GetNotesFlowUseCase(fakeRepository)
     val getNoteById = GetNoteByIdUseCase(fakeRepository)
@@ -261,7 +285,7 @@ fun previewNotesViewModel(): NotesViewModel {
 @Preview
 @Composable
 private fun PreviewNotesScreen() {
-    AppTheme(ThemeMode.SYSTEM, AppColorScheme.Default ) {
+    AppTheme(ThemeMode.SYSTEM, AppColorScheme.Default) {
         NotesScreen(
             navController = rememberNavController(),
             viewModel = previewNotesViewModel()

@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.BottomNavigationItem
-import java.lang.reflect.Modifier
 
 @Composable
 fun BottomNavigationPanel(navController: NavController) {

@@ -23,15 +23,16 @@ class TaskRepositoryImpl @Inject constructor(
             .flowOn(Dispatchers.IO)
 
 
-    override suspend fun saveTask(task: Task) = withContext(Dispatchers.IO){
+    override suspend fun saveTask(task: Task) = withContext(Dispatchers.IO) {
         taskDAO.insertTask(task.toEntity())
         Unit
     }
 
-    override suspend fun updateTaskStatus(id: Long, isCompleted: Boolean) = withContext(Dispatchers.IO) {
-        taskDAO.updateTaskStatus(id, isCompleted)
-        Unit
-    }
+    override suspend fun updateTaskStatus(id: Long, isCompleted: Boolean) =
+        withContext(Dispatchers.IO) {
+            taskDAO.updateTaskStatus(id, isCompleted)
+            Unit
+        }
 
     override suspend fun deleteTask(id: Long) = withContext(Dispatchers.IO) {
         taskDAO.deleteTask(id)

@@ -1,8 +1,6 @@
 package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.service
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.BuildConfig
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.api.GigaChatApi
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.dto.ChatRequest
@@ -10,7 +8,6 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.GigaChatService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,7 +18,7 @@ class GigaChatServiceImpl @Inject constructor(
 
     // Кешируем токен в памяти
     private var cachedToken: String? = null
-    private var tokenExpiry: Long = 0L // время истечения в миллисекундах
+    private var tokenExpiry: Long = 0L
 
     private val _balance = MutableStateFlow<Double?>(null)
     override val balance: StateFlow<Double?> = _balance
@@ -57,12 +54,16 @@ class GigaChatServiceImpl @Inject constructor(
         ensureToken()
         val token = cachedToken ?: return null
 
-        val prompt = "Преобразуй следующий текст в чёткую задачу. Верни только текст задачи, без лишних слов. Текст: $voiceText"
+        val prompt =
+            "Преобразуй следующий текст в чёткую задачу. Верни только текст задачи, без лишних слов. Текст: $voiceText"
 
         val request = ChatRequest(
             model = "GigaChat-3-Ultra",
             messages = listOf(
-                Message(role = "system", content = "Ты помощник, который преобразует текст в задачу."),
+                Message(
+                    role = "system",
+                    content = "Ты помощник, который преобразует текст в задачу."
+                ),
                 Message(role = "user", content = prompt)
             )
         )

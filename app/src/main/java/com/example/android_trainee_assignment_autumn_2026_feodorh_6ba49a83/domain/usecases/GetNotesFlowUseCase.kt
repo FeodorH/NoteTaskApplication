@@ -8,5 +8,5 @@ import javax.inject.Inject
 class GetNotesFlowUseCase @Inject constructor(
     private val repository: NoteRepository
 ) {
-    operator fun invoke() : Flow<List<Note>> = repository.getNotesFlow()
+    operator fun invoke(): Flow<List<Note>> = repository.getNotesFlow()
 }

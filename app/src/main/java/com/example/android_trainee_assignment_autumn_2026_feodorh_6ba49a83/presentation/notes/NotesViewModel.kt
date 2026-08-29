@@ -21,11 +21,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NotesViewModel @Inject constructor(
-    val getNotesFlow : GetNotesFlowUseCase,
-    val getNoteById : GetNoteByIdUseCase,
-    val createNote : CreateNoteUseCase,
-    val deleteNoteById : DeleteNoteByIdUseCase,
-    val deleteAllNotes : DeleteAllNotesUseCase
+    val getNotesFlow: GetNotesFlowUseCase,
+    val getNoteById: GetNoteByIdUseCase,
+    val createNote: CreateNoteUseCase,
+    val deleteNoteById: DeleteNoteByIdUseCase,
+    val deleteAllNotes: DeleteAllNotesUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NotesUiState())
@@ -34,6 +34,7 @@ class NotesViewModel @Inject constructor(
     // Внутренние флоу для быстрой фильтрации и поиска
     private val searchQueryFlow = MutableStateFlow("")
     private val sortOrderFlow = MutableStateFlow(SortOrder.NEWEST)
+
     // Связь с View
     val searchQuery: StateFlow<String> = searchQueryFlow.asStateFlow()
 
@@ -67,7 +68,8 @@ class NotesViewModel @Inject constructor(
 
     fun toggleSortOrder() {
         val current = sortOrderFlow.value
-        sortOrderFlow.value = if (current == SortOrder.NEWEST) SortOrder.OLDEST else SortOrder.NEWEST
+        sortOrderFlow.value =
+            if (current == SortOrder.NEWEST) SortOrder.OLDEST else SortOrder.NEWEST
     }
 
     fun toggleDeleteMode() {

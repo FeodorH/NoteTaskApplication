@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -71,7 +70,7 @@ fun SettingsScreen(
             )
         }
     ) { paddingValues ->
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
@@ -80,126 +79,129 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Баланс GigaChat
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "Баланс токенов GigaChat",
-                    style = MaterialTheme.typography.titleMedium
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                when {
-                    state.isBalanceLoading -> {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Загрузка...")
-                        }
-                    }
-                    state.error != null -> {
-                        Column {
-                            Text(
-                                text = "Ошибка: ${state.error}",
-                                color = MaterialTheme.colorScheme.error
-                            )
-                            TextButton(onClick = { viewModel.loadBalance() }) {
-                                Text("Повторить")
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Баланс токенов GigaChat",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    when {
+                        state.isBalanceLoading -> {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Загрузка...")
                             }
                         }
+
+                        state.error != null -> {
+                            Column {
+                                Text(
+                                    text = "Ошибка: ${state.error}",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                                TextButton(onClick = { viewModel.loadBalance() }) {
+                                    Text("Повторить")
+                                }
+                            }
+                        }
+
+                        state.balance != null -> {
+                            Text(
+                                text = "${"%.2f".format(state.balance)} токенов",
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                        }
+
+                        else -> {
+                            Text("Не удалось загрузить баланс")
+                        }
                     }
-                    state.balance != null -> {
+                }
+            }
+
+
+            // Настройка темы
+            Text(
+                text = "Тема",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            Column {
+                ThemeMode.values().forEach { mode ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { viewModel.updateThemeMode(mode) }
+                            .padding(vertical = 12.dp)
+                    ) {
+                        RadioButton(
+                            selected = state.themeMode == mode,
+                            onClick = { viewModel.updateThemeMode(mode) }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "${"%.2f".format(state.balance)} токенов",
-                            style = MaterialTheme.typography.headlineSmall
+                            text = when (mode) {
+                                ThemeMode.LIGHT -> "Светлая"
+                                ThemeMode.DARK -> "Тёмная"
+                                ThemeMode.SYSTEM -> "Системная"
+                            },
+                            style = MaterialTheme.typography.bodyLarge
                         )
                     }
-                    else -> {
-                        Text("Не удалось загрузить баланс")
+                }
+            }
+
+
+            // Настройка цветовой схемы
+            Text(
+                text = "Цветовая схема",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            Column {
+                AppColorScheme.PresetColors.forEach { scheme ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { viewModel.updateColorScheme(scheme) }
+                            .padding(vertical = 12.dp)
+                    ) {
+                        RadioButton(
+                            selected = state.colorScheme.id == scheme.id,
+                            onClick = { viewModel.updateColorScheme(scheme) }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color(scheme.primary))
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = scheme.name,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 }
             }
         }
 
-
-    // Настройка темы
-        Text(
-            text = "Тема",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 8.dp)
-        )
-
-        Column {
-            ThemeMode.values().forEach { mode ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { viewModel.updateThemeMode(mode) }
-                        .padding(vertical = 12.dp)
-                ) {
-                    RadioButton(
-                        selected = state.themeMode == mode,
-                        onClick = { viewModel.updateThemeMode(mode) }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = when (mode) {
-                            ThemeMode.LIGHT -> "Светлая"
-                            ThemeMode.DARK -> "Тёмная"
-                            ThemeMode.SYSTEM -> "Системная"
-                        },
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-            }
-        }
-
-
-    // Настройка цветовой схемы
-        Text(
-            text = "Цветовая схема",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 8.dp)
-        )
-
-        Column {
-            AppColorScheme.PresetColors.forEach { scheme ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { viewModel.updateColorScheme(scheme) }
-                        .padding(vertical = 12.dp)
-                ) {
-                    RadioButton(
-                        selected = state.colorScheme.id == scheme.id,
-                        onClick = { viewModel.updateColorScheme(scheme) }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color(scheme.primary))
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = scheme.name,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-            }
-        }
-    }
-
-    // Кнопка сброса
+        // Кнопка сброса
         Button(
             onClick = { viewModel.resetSettings() },
             modifier = Modifier.fillMaxWidth(),

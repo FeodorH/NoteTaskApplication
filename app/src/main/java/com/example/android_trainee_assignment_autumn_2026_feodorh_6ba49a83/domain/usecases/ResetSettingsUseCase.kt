@@ -6,7 +6,7 @@ import javax.inject.Inject
 class ResetSettingsUseCase @Inject constructor(
     val repository: SettingsRepository
 ) {
-    suspend operator fun invoke(){
+    suspend operator fun invoke() {
         repository.resetSettings()
     }
 }

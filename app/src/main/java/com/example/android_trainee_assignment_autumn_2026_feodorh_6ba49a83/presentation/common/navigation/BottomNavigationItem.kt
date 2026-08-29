@@ -6,7 +6,7 @@ import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
-sealed class BottomNavigationItem (
+sealed class BottomNavigationItem(
     val route: String,
     val icon: ImageVector,
     val label: String

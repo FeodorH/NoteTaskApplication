@@ -1,7 +1,7 @@
 package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models
 
 data class ExchangeNoteUiState(
-    val noteId : Long = 1,
+    val noteId: Long = 1,
     val title: String = "",
     val content: String = "",
     val imageUri: String? = null,

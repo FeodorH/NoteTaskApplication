@@ -1,11 +1,12 @@
 package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.repository
 
 import android.content.Context
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.datastore.dataStore
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.AppColorScheme
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.ThemeMode
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.repository.SettingsRepository
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.local.datastore.dataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

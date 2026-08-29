@@ -4,11 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceEvent
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceInputService
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.CreateNoteUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNoteByIdUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.ExchangeNoteUiState
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceEvent
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceInputService
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.VoiceState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -138,12 +138,15 @@ open class ExchangeNoteViewModel @Inject constructor(
                     is VoiceEvent.Ready -> {
                         // можно не обновлять состояние
                     }
+
                     is VoiceEvent.Listening -> {
                         _state.update { it.copy(voiceState = VoiceState.RECORDING) }
                     }
+
                     is VoiceEvent.PartialResult -> {
                         // можно показать промежуточный текст, если нужно
                     }
+
                     is VoiceEvent.FinalResult -> {
                         // Добавляем распознанный текст в поле содержимого
                         val currentContent = _state.value.content
@@ -159,6 +162,7 @@ open class ExchangeNoteViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is VoiceEvent.Error -> {
                         _state.update {
                             it.copy(
@@ -167,6 +171,7 @@ open class ExchangeNoteViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is VoiceEvent.Cancelled -> {
                         _state.update { it.copy(voiceState = VoiceState.IDLE) }
                     }

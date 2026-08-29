@@ -5,7 +5,6 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.service.VoiceInputServiceFactory
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.service.VoskVoiceInputService
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceInputService
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

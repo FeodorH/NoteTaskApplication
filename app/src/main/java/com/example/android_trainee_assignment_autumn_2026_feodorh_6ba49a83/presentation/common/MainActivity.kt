@@ -39,7 +39,9 @@ class MainActivity : ComponentActivity() {
                 themeMode = uiState.themeMode,
                 colorScheme = uiState.colorScheme
             ) {
-                Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+                Column(modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()) {
                     NavHost(
                         navController = navController,
                         startDestination = Routes.NOTES.route,
