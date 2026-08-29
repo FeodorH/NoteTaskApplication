@@ -46,14 +46,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.repository.NoteRepository
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceEvent
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceInputService
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.CreateNoteUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.DeleteAllNotesUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.DeleteNoteByIdUseCase
@@ -61,9 +58,8 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domai
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNotesFlowUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.common.navigation.Routes
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.SortOrder
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.Androidtraineeassignmentautumn2026feodorh6ba49a83Theme
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.MainTheme
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -71,7 +67,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Notes(
+fun NotesScreen(
     navController: NavController,
     viewModel: NotesViewModel = hiltViewModel()
 ) {
@@ -82,8 +78,8 @@ fun Notes(
     LaunchedEffect(Unit) {
         viewModel.loadNotes()
     }
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        topBar = {
             TopAppBar(
                 title = { Text("Заметки") },
                 actions = {
@@ -103,6 +99,19 @@ fun Notes(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate(Routes.editNote(0L)) },
+                modifier = Modifier
+                    .padding(16.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Создать заметку")
+            }
+        }
+    ) { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize()
+            .padding(paddingValues)) {
 
             OutlinedTextField(
                 value = searchQuery,
@@ -145,14 +154,6 @@ fun Notes(
                     }
                 }
             }
-        }
-        FloatingActionButton(
-            onClick = { navController.navigate(Routes.editNote(0L)) },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Создать заметку")
         }
     }
 }
@@ -257,9 +258,9 @@ fun previewNotesViewModel(): NotesViewModel {
 
 @Preview
 @Composable
-private fun PreviewNotes() {
-    Androidtraineeassignmentautumn2026feodorh6ba49a83Theme {
-        Notes(
+private fun PreviewNotesScreen() {
+    MainTheme {
+        NotesScreen(
             navController = rememberNavController(),
             viewModel = previewNotesViewModel()
         )

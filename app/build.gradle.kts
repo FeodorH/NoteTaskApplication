@@ -51,6 +51,8 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.runtime)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.androidx.compose.ui.tooling.preview)
@@ -101,6 +103,7 @@ dependencies {
     //androidTestImplementation(libs.mockk.android)
 
     implementation(libs.kotlinx.serialization.json)
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 }

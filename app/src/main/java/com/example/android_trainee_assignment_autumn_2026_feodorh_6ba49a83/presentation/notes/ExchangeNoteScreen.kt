@@ -3,11 +3,9 @@ package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.pres
 import android.Manifest
 import android.net.Uri
 import android.os.Build
-import android.speech.tts.Voice
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,22 +26,15 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.R
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.ExchangeNoteUiState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.SavedStateHandle
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Note
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.repository.NoteRepository
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.AndroidVoiceInputService
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceEvent
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.service.VoiceInputService
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.CreateNoteUseCase
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.DeleteAllNotesUseCase
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.DeleteNoteByIdUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNoteByIdUseCase
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GetNotesFlowUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes.models.VoiceState
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.Androidtraineeassignmentautumn2026feodorh6ba49a83Theme
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.MainTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -59,7 +49,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun ExchangeNote(
+fun ExchangeNoteScreen(
     navController: NavController,
     viewModel: ExchangeNoteViewModel = hiltViewModel()
 ) {
@@ -141,14 +131,8 @@ fun ExchangeNote(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()){
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+    Scaffold(
+        topBar = {
             TopAppBar(
                 title = {
                     Text(if (viewModel.noteId == 0L) "Новая заметка" else "Редактирование")
@@ -160,31 +144,54 @@ fun ExchangeNote(
                 },
                 actions = {
                     // Кнопка голосового ввода
-                    IconButton(modifier = Modifier.background(color =
-                        if(state.voiceState == VoiceState.IDLE){
-                            Color.White
-                        }else{
-                            Color.Black
+                    IconButton(onClick = {
+                        if (recordAudioPermissionState.status.isGranted) {
+                            viewModel.startVoiceInput()
+                        } else {
+                            recordAudioPermissionState.launchPermissionRequest()
                         }
-                    ),
-                        onClick = {
-                            if (recordAudioPermissionState.status.isGranted) {
-                                viewModel.startVoiceInput()
-                            } else {
-                                recordAudioPermissionState.launchPermissionRequest()
-                            }
 
-                            if (state.voiceState == VoiceState.IDLE){
-                                viewModel.startVoiceInput()
-                            }else{
-                                viewModel.cancelVoiceInput()
-                            }
+                        if (state.voiceState == VoiceState.IDLE) {
+                            viewModel.startVoiceInput()
+                        } else {
+                            viewModel.cancelVoiceInput()
+                        }
                     }) {
-                        Icon(Icons.Default.Mic, contentDescription = "Голосовой ввод")
+                        Icon(
+                            imageVector = if (state.voiceState == VoiceState.RECORDING) Icons.Default.Stop else Icons.Default.Mic,
+                            contentDescription = "Голосовой ввод"
+                        )
                     }
                 }
             )
-
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    if (!state.isSaving) {
+                        viewModel.saveNote()
+                    }
+                },
+                modifier = Modifier
+                    .alpha(if (state.isSaving) 0.5f else 1f)
+            ) {
+                if (state.isSaving) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                } else {
+                    Icon(Icons.Default.Check, contentDescription = "Сохранить")
+                }
+            }
+        }
+    )
+    {paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             // Поле заголовка
             OutlinedTextField(
                 value = state.title,
@@ -310,22 +317,6 @@ fun ExchangeNote(
                 ErrorMessage(error = state.errorMessage)
             }
         }
-        FloatingActionButton(
-            onClick = {
-                if (!state.isSaving) {
-                    viewModel.saveNote()
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .alpha(if (state.isSaving) 0.5f else 1f)
-        ) {
-            if (state.isSaving) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp))
-            } else {
-                Icon(Icons.Default.Check, contentDescription = "Сохранить")
-            }
-        }
     }
 }
 
@@ -373,9 +364,9 @@ fun previewExchangeNoteViewModel(
 
 @Preview
 @Composable
-private fun PreviewExchangeNote() {
-    Androidtraineeassignmentautumn2026feodorh6ba49a83Theme {
-        ExchangeNote(
+private fun PreviewExchangeNoteScreen() {
+    MainTheme {
+        ExchangeNoteScreen(
             navController = rememberNavController(),
             viewModel = previewExchangeNoteViewModel(noteId = 1L)
         )
