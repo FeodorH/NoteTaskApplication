@@ -1,6 +1,7 @@
 package com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.notes
 
 import android.Manifest
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
@@ -354,65 +356,5 @@ fun ExchangeNoteScreen(
                 ErrorMessage(error = state.errorMessage)
             }
         }
-    }
-}
-
-// Фабрика для превью
-fun previewExchangeNoteViewModel(
-    noteId: Long = 1L,
-    existingNote: Note? = null
-): ExchangeNoteViewModel {
-    val fakeNote = existingNote ?: Note(
-        id = noteId,
-        title = "Тестовая заметка",
-        content = "Это содержимое заметки для превью.",
-        imageUri = null,
-        createdAt = System.currentTimeMillis()
-    )
-
-    val fakeRepository = object : NoteRepository {
-        override fun getNotesFlow(): Flow<List<Note>> = flowOf(listOf(fakeNote))
-        override suspend fun getNoteById(id: Long): Note? =
-            if (id == fakeNote.id) fakeNote else null
-
-        override suspend fun saveNote(note: Note) { /* ничего */
-        }
-
-        override suspend fun deleteNote(id: Long) { /* ничего */
-        }
-
-        override suspend fun deleteAllNotes() { /* ничего */
-        }
-    }
-
-    val fakeVoiceService = object : VoiceInputService {
-        override fun startListening(): Flow<VoiceEvent> = emptyFlow()
-        override fun stopListening() { /* ничего */
-        }
-    }
-
-    val getNoteById = GetNoteByIdUseCase(fakeRepository)
-    val createNote = CreateNoteUseCase(fakeRepository)
-
-    val savedStateHandle = SavedStateHandle().apply {
-        set("noteId", noteId)
-    }
-
-    return ExchangeNoteViewModel(
-        getNoteById = getNoteById,
-        createNote = createNote,
-        voiceInputService = fakeVoiceService,
-        savedStateHandle = savedStateHandle
-    )
-}
-
-@Preview
-@Composable
-private fun PreviewExchangeNoteScreen() {
-    AppTheme(ThemeMode.SYSTEM, AppColorScheme.Default) {
-        ExchangeNoteScreen(
-            navController = rememberNavController(),
-            viewModel = previewExchangeNoteViewModel(noteId = 1L)
-        )
     }
 }
