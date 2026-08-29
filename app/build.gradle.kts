@@ -99,11 +99,12 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
 
     // Testing
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.androidx.core.testing)
 
     // Заглушки
     //testImplementation(libs.mockk)
@@ -111,12 +112,16 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
 
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation(libs.androidx.datastore.preferences)
 
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation(libs.androidx.compose.material.icons.extended)
 
     implementation("com.alphacephei:vosk-android:0.3.45") {
         exclude(group = "net.java.dev.jna", module = "jna")
     }
-    implementation("net.java.dev.jna:jna:5.13.0@aar")
+    implementation(libs.jna)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

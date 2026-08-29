@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
-</PreferenceScreen>
+<network-security-config>
+    <domain-config>
+        <domain includeSubdomains="true">ngw.devices.sberbank.ru</domain>
+        <trust-anchors>
+            <certificates src="system"/>
+            <certificates src="@raw/gigachat_cert"/>
+        </trust-anchors>
+    </domain-config>
+</network-security-config>
