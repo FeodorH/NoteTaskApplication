@@ -23,6 +23,7 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.dto.BalanceResponse
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.dto.ChatRequest
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.dto.ChatResponse
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.dto.ModelsResponse
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.dto.TokenResponse
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.data.network.gigachat.service.GigaChatServiceImpl
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.model.Task
@@ -36,20 +37,18 @@ import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domai
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.GigaChatGenerateTaskUsingByVoiceUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.domain.usecases.UpdateTaskStatusUseCase
 import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.tasks.models.TaskFilter
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.presentation.tasks.models.TasksUiState
-import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.Androidtraineeassignmentautumn2026feodorh6ba49a83Theme
+import com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83.ui.theme.MainTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flowOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
     ExperimentalPermissionsApi::class
 )
 @Composable
-fun Tasks(
+fun TasksScreen(
     navController: NavController,
     viewModel: TasksViewModel = hiltViewModel()
 ) {
@@ -251,53 +250,66 @@ fun AddTaskItem(
     }
 }
 
-//// Фабрика для превью
-//fun previewTasksViewModel(): TasksViewModel {
-//    // Создаём заглушки UseCase
-//    val fakeRepository = object : TaskRepository {
-//        override fun getTasksFlow() = emptyFlow<List<Task>>()
-//        override suspend fun saveTask(task: Task) {}
-//        override suspend fun deleteTask(id: Long) {}
-//        override suspend fun updateTaskStatus(id: Long, isCompleted: Boolean) {}
-//    }
-//    val fakeGigaChatApi : GigaChatApi = object : GigaChatApi{
-//        override suspend fun getToken(
-//            authorization: String,
-//            rqUid: String,
-//            scope: String
-//        ): TokenResponse = TokenResponse("")
-//
-//        override suspend fun getBalance(authorization: String)
-//        : BalanceResponse = BalanceResponse(emptyMap())
-//
-//        override suspend fun generateTask(
-//            authorization: String,
-//            request: ChatRequest
-//        ): ChatResponse = ChatResponse(emptyList())
-//
-//    }
-//    val fakeGigaChatService : GigaChatService = GigaChatServiceImpl(fakeGigaChatApi)
-//    val fakeVoiceService = object : VoiceInputService {
-//        override fun startListening(): Flow<VoiceEvent> = emptyFlow()
-//        override fun stopListening() { /* ничего */ }
-//    }
-//
-//    val getTasksFlow = GetTasksFlowUseCase(fakeRepository)
-//    val saveTask = CreateTaskUseCase(fakeRepository)
-//    val deleteTask = DeleteTaskUseCase(fakeRepository)
-//    val updateTaskStatus = UpdateTaskStatusUseCase(fakeRepository)
-//    val generateTaskUsingByVoiceUseCase = GigaChatGenerateTaskUsingByVoiceUseCase(fakeGigaChatService)
-//    return TasksViewModel(getTasksFlow, saveTask, deleteTask, updateTaskStatus, fakeVoiceService, generateTaskUsingByVoiceUseCase)
-//}
-//
-//@Preview
-//@Composable
-//fun PreviewTasksScreen() {
-//    Androidtraineeassignmentautumn2026feodorh6ba49a83Theme {
-//        Tasks(
-//            navController = rememberNavController(),
-//            viewModel = previewTasksViewModel()
-//        )
-//    }
-//}
-//
+// Фабрика для превью
+fun previewTasksViewModel(): TasksViewModel {
+    // Создаём заглушки UseCase
+    val fakeRepository = object : TaskRepository {
+        override fun getTasksFlow() = emptyFlow<List<Task>>()
+        override suspend fun saveTask(task: Task) {}
+        override suspend fun deleteTask(id: Long) {}
+        override suspend fun updateTaskStatus(id: Long, isCompleted: Boolean) {}
+    }
+    val fakeGigaChatApi : GigaChatApi = object : GigaChatApi {
+        override suspend fun getToken(
+            url: String,
+            contentType: String,
+            accept: String,
+            rqUid: String,
+            authorization: String,
+            scope: String
+        ): TokenResponse = TokenResponse("")
+
+        override suspend fun getModels(
+            accept: String,
+            authorization: String
+        ): ModelsResponse = ModelsResponse(emptyList())
+
+        override suspend fun getBalance(
+            accept: String,
+            authorization: String
+        ): BalanceResponse = BalanceResponse(emptyList())
+
+        override suspend fun generateTask(
+            contentType: String,
+            accept: String,
+            authorization: String,
+            request: ChatRequest
+        ): ChatResponse = ChatResponse(emptyList())
+
+    }
+    val fakeGigaChatService : GigaChatService = GigaChatServiceImpl(fakeGigaChatApi)
+    val fakeVoiceService = object : VoiceInputService {
+        override fun startListening(): Flow<VoiceEvent> = emptyFlow()
+        override fun stopListening() { /* ничего */ }
+    }
+
+    val getTasksFlow = GetTasksFlowUseCase(fakeRepository)
+    val saveTask = CreateTaskUseCase(fakeRepository)
+    val deleteTask = DeleteTaskUseCase(fakeRepository)
+    val updateTaskStatus = UpdateTaskStatusUseCase(fakeRepository)
+    val generateTaskUsingByVoiceUseCase =
+        GigaChatGenerateTaskUsingByVoiceUseCase(fakeGigaChatService)
+    return TasksViewModel(getTasksFlow, saveTask, deleteTask, updateTaskStatus, fakeVoiceService, generateTaskUsingByVoiceUseCase)
+}
+
+@Preview
+@Composable
+fun PreviewTasksScreen() {
+    MainTheme {
+        TasksScreen(
+            navController = rememberNavController(),
+            viewModel = previewTasksViewModel()
+        )
+    }
+}
+

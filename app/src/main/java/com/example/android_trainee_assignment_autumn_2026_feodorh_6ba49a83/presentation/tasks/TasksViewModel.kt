@@ -194,6 +194,7 @@ class TasksViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-
+        voiceJob?.cancel()
+        voiceInputService.stopListening()
     }
 }
