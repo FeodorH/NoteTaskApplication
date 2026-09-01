@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83"
+    namespace = "com.example.note_task_app"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.example.android_trainee_assignment_autumn_2026_feodorh_6ba49a83"
+        applicationId = "com.example.note_task_app"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
