@@ -6,6 +6,7 @@ import com.example.note_task_app.R
 import com.example.note_task_app.data.network.gigachat.api.GigaChatApi
 import com.example.note_task_app.data.network.gigachat.service.GigaChatServiceImpl
 import com.example.note_task_app.domain.service.GigaChatService
+import com.example.note_task_app.data.utils.loadCertificateFromRaw
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -18,8 +19,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.security.KeyStore
-import java.security.cert.CertificateFactory
-import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import javax.net.ssl.SSLContext
@@ -66,7 +65,8 @@ object GigaChatModule {
         }
 
         val logging = HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+            level =
+                if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         }
 
         return OkHttpClient.Builder()
@@ -81,13 +81,6 @@ object GigaChatModule {
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build()
-    }
-
-    private fun loadCertificateFromRaw(context: Context, rawResId: Int): X509Certificate {
-        context.resources.openRawResource(rawResId).use { inputStream ->
-            val certificateFactory = CertificateFactory.getInstance("X.509")
-            return certificateFactory.generateCertificate(inputStream) as X509Certificate
-        }
     }
 
     @Provides
