@@ -7,7 +7,7 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
-import com.example.note_task_app.domain.service.VoiceEvent
+import com.example.note_task_app.domain.model.VoiceEvent
 import com.example.note_task_app.domain.service.VoiceInputService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose

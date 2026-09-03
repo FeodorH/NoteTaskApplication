@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -112,16 +113,24 @@ fun SettingsScreen(
                                     color = MaterialTheme.colorScheme.error
                                 )
                                 TextButton(onClick = { viewModel.loadBalance() }) {
-                                    Text("Повторить")
+                                    Text("Повторить загрузку")
                                 }
                             }
                         }
 
                         state.balance != null -> {
-                            Text(
-                                text = "${"%.2f".format(state.balance)} токенов",
-                                style = MaterialTheme.typography.headlineSmall
-                            )
+                            Row {
+                                Text(
+                                    modifier = Modifier.weight(1f),
+                                    text = "%.2f".format(state.balance),
+                                    style = MaterialTheme.typography.headlineSmall
+                                )
+                                Button(
+                                    onClick = { viewModel.loadBalance() }
+                                ) {
+                                    Icon(Icons.Default.Refresh, contentDescription = "Обновить")
+                                }
+                            }
                         }
 
                         else -> {
@@ -199,21 +208,21 @@ fun SettingsScreen(
                     }
                 }
             }
-        }
 
-        // Кнопка сброса
-        Button(
-            onClick = { viewModel.resetSettings() },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error,
-                contentColor = MaterialTheme.colorScheme.onError
-            )
-        ) {
-            Text("Сбросить настройки")
-        }
+            // Кнопка сброса
+            Button(
+                onClick = { viewModel.resetSettings() },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                )
+            ) {
+                Text("Сбросить настройки")
+            }
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+        }
     }
 }
 

@@ -17,7 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.note_task_app.presentation.common.navigation.Routes
-import com.example.note_task_app.presentation.common.theme.AppTheme
+import com.example.note_task_app.ui.theme.AppTheme
 import com.example.note_task_app.presentation.notes.ExchangeNoteScreen
 import com.example.note_task_app.presentation.notes.NotesScreen
 import com.example.note_task_app.presentation.settings.SettingsScreen

@@ -106,10 +106,6 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.androidx.core.testing)
 
-    // Заглушки
-    //testImplementation(libs.mockk)
-    //androidTestImplementation(libs.mockk.android)
-
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.datastore.preferences)
@@ -120,6 +116,12 @@ dependencies {
         exclude(group = "net.java.dev.jna", module = "jna")
     }
     implementation(libs.jna)
+
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.mockk.android)
 }
 
 tasks.withType<Test> {

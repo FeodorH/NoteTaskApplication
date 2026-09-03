@@ -16,7 +16,6 @@ import java.util.UUID
 
 interface GigaChatApi {
 
-    // Метод получения токена – полный URL передаётся как параметр
     @POST
     @FormUrlEncoded
     suspend fun getToken(
@@ -28,7 +27,6 @@ interface GigaChatApi {
         @Field("scope") scope: String = "GIGACHAT_API_PERS"
     ): TokenResponse
 
-    // Остальные методы используют относительный путь, базовый URL будет https://api.giga.chat/
     @GET("v1/models")
     suspend fun getModels(
         @Header("Accept") accept: String = "application/json",

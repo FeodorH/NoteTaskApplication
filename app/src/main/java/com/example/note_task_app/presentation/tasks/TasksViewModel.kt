@@ -3,7 +3,7 @@ package com.example.note_task_app.presentation.tasks
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.note_task_app.domain.model.Task
-import com.example.note_task_app.domain.service.VoiceEvent
+import com.example.note_task_app.domain.model.VoiceEvent
 import com.example.note_task_app.domain.service.VoiceInputService
 import com.example.note_task_app.domain.usecases.CreateTaskUseCase
 import com.example.note_task_app.domain.usecases.DeleteTaskUseCase

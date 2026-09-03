@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.note_task_app.domain.model.Note
-import com.example.note_task_app.domain.service.VoiceEvent
+import com.example.note_task_app.domain.model.VoiceEvent
 import com.example.note_task_app.domain.service.VoiceInputService
 import com.example.note_task_app.domain.usecases.CreateNoteUseCase
 import com.example.note_task_app.domain.usecases.GetNoteByIdUseCase
@@ -136,7 +136,6 @@ open class ExchangeNoteViewModel @Inject constructor(
             voiceInputService.startListening().collect { event ->
                 when (event) {
                     is VoiceEvent.Ready -> {
-                        // можно не обновлять состояние
                     }
 
                     is VoiceEvent.Listening -> {

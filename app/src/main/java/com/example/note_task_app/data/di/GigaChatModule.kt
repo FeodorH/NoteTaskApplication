@@ -1,5 +1,8 @@
 package com.example.note_task_app.data.di
 
+import android.content.Context
+import com.example.note_task_app.BuildConfig
+import com.example.note_task_app.R
 import com.example.note_task_app.data.network.gigachat.api.GigaChatApi
 import com.example.note_task_app.data.network.gigachat.service.GigaChatServiceImpl
 import com.example.note_task_app.domain.service.GigaChatService
@@ -8,14 +11,19 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.security.KeyStore
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
 @Module
@@ -31,53 +39,56 @@ object GigaChatModule {
     }
 
     @Provides
-    @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
-        // TODO Временно доверяем всем сертификатам (для тестирования) - для прода заменить
-        val trustAllCerts = arrayOf<X509TrustManager>(object : X509TrustManager {
-            override fun checkClientTrusted(
-                p0: Array<out java.security.cert.X509Certificate?>?,
-                p1: String?
-            ) {
-            }
+    @Singleton // с подгрузкой сертификатов
+    fun provideGigaChatOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
+        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType()).apply {
+            load(null, null)
+            // Загружаем корневой сертификат
+            val rootCert = loadCertificateFromRaw(context, R.raw.root_ca)
+            setCertificateEntry("root_ca", rootCert)
+            // Загружаем промежуточный сертификат
+            val subCert = loadCertificateFromRaw(context, R.raw.sub_ca)
+            setCertificateEntry("sub_ca", subCert)
+            // Загружаем серверный сертификат (для ngw.devices.sberbank.ru)
+            val serverCert = loadCertificateFromRaw(context, R.raw.server_cert)
+            setCertificateEntry("server_cert", serverCert)
+        }
 
-            override fun checkServerTrusted(
-                p0: Array<out java.security.cert.X509Certificate?>?,
-                p1: String?
-            ) {
-            }
+        val trustManagerFactory = TrustManagerFactory.getInstance(
+            TrustManagerFactory.getDefaultAlgorithm()
+        ).apply {
+            init(keyStore)
+        }
+        val trustManager = trustManagerFactory.trustManagers.first() as X509TrustManager
 
-            override fun getAcceptedIssuers(): Array<out java.security.cert.X509Certificate?> =
-                arrayOf()
-        })
-        val sslContext = SSLContext.getInstance("SSL")
-        sslContext.init(null, trustAllCerts, java.security.SecureRandom())
-        val sslSocketFactory = sslContext.socketFactory
+        val sslContext = SSLContext.getInstance("TLS").apply {
+            init(null, arrayOf(trustManager), null)
+        }
 
         val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         }
+
         return OkHttpClient.Builder()
             .addInterceptor(logging)
-            .sslSocketFactory(sslSocketFactory, trustAllCerts[0])
-            .hostnameVerifier { _, _ -> true }
+            .sslSocketFactory(sslContext.socketFactory, trustManager)
+            .hostnameVerifier { hostname, _ ->
+                // Разрешаем оба домена, используемые GigaChat
+                hostname == "ngw.devices.sberbank.ru" ||
+                        hostname == "api.giga.chat" ||
+                        hostname.endsWith(".giga.chat")
+            }
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build()
     }
 
-    /*@Provides
-    @Singleton
-    fun provideGigaChatOkHttpClient(): OkHttpClient {
-        val logging = HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+    private fun loadCertificateFromRaw(context: Context, rawResId: Int): X509Certificate {
+        context.resources.openRawResource(rawResId).use { inputStream ->
+            val certificateFactory = CertificateFactory.getInstance("X.509")
+            return certificateFactory.generateCertificate(inputStream) as X509Certificate
         }
-        return OkHttpClient.Builder()
-            .addInterceptor(logging)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build()
-    }*/
+    }
 
     @Provides
     @Singleton

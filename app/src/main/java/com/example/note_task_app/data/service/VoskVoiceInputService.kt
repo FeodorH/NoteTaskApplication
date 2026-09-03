@@ -7,7 +7,7 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import androidx.core.content.ContextCompat
-import com.example.note_task_app.domain.service.VoiceEvent
+import com.example.note_task_app.domain.model.VoiceEvent
 import com.example.note_task_app.domain.service.VoiceInputService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

@@ -2,9 +2,12 @@
 <network-security-config>
     <domain-config>
         <domain includeSubdomains="true">ngw.devices.sberbank.ru</domain>
+        <domain includeSubdomains="true">api.giga.chat</domain>
         <trust-anchors>
             <certificates src="system"/>
-            <certificates src="@raw/gigachat_cert"/>
+            <certificates src="@raw/root_ca"/>
+            <certificates src="@raw/sub_ca"/>
+            <certificates src="@raw/server_cert"/>
         </trust-anchors>
     </domain-config>
 </network-security-config>
