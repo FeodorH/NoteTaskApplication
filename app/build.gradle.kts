@@ -115,7 +115,7 @@ dependencies {
     implementation("com.alphacephei:vosk-android:0.3.45") {
         exclude(group = "net.java.dev.jna", module = "jna")
     }
-    implementation(libs.jna)
+    implementation("net.java.dev.jna:jna:5.14.0@aar")
 
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)

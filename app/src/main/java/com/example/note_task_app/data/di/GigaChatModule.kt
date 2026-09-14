@@ -42,13 +42,10 @@ object GigaChatModule {
     fun provideGigaChatOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
         val keyStore = KeyStore.getInstance(KeyStore.getDefaultType()).apply {
             load(null, null)
-            // Загружаем корневой сертификат
             val rootCert = loadCertificateFromRaw(context, R.raw.root_ca)
             setCertificateEntry("root_ca", rootCert)
-            // Загружаем промежуточный сертификат
             val subCert = loadCertificateFromRaw(context, R.raw.sub_ca)
             setCertificateEntry("sub_ca", subCert)
-            // Загружаем серверный сертификат (для ngw.devices.sberbank.ru)
             val serverCert = loadCertificateFromRaw(context, R.raw.server_cert)
             setCertificateEntry("server_cert", serverCert)
         }

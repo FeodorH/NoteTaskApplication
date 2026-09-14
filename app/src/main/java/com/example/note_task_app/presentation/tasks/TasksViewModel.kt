@@ -1,5 +1,6 @@
 package com.example.note_task_app.presentation.tasks
 
+import android.net.http.NetworkException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.note_task_app.domain.model.Task
@@ -20,6 +21,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okio.IOException
+import java.net.UnknownHostException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -159,8 +162,12 @@ class TasksViewModel @Inject constructor(
                 } else {
                     _state.update { it.copy(errorMessage = "Не удалось сгенерировать задачу") }
                 }
-            } catch (e: NullPointerException) {
-                _state.update { it.copy(errorMessage = e.message ?: "Ошибка генерации") }
+            } catch (_: NullPointerException) {
+                _state.update { it.copy(errorMessage = "Ошибка: задача не создана") }
+            }catch (e: IOException) {
+                _state.update { it.copy(errorMessage = "Ошибка сети: ${e.message}") }
+            }catch (e: Exception){
+                _state.update { it.copy(errorMessage = "Ошибка: ${e.message}") }
             } finally {
                 _state.update { it.copy(isLoading = false) }
             }

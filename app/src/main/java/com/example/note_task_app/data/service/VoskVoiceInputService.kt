@@ -33,25 +33,31 @@ class VoskVoiceInputService @Inject constructor(
     private var isRecording = false
 
     private val modelAssetPath = "vosk-model-small-ru-0.22"
-    private var model: Model? = null
+    private val model: Model by lazy(LazyThreadSafetyMode.SYNCHRONIZED){
+        provideModelPath()
+    }
+
+    fun provideModelPath(): Model{
+        val modelDir = File(context.filesDir, modelAssetPath)
+        // Если папка не существует или пуста — копируем
+        if (!modelDir.exists() || modelDir.listFiles()?.isEmpty() == true) {
+            copyModelFromAssets()
+        }
+        // Проверяем наличие ключевых файлов модели (например, am или conf)
+        val hasModelFiles = modelDir.listFiles()?.any {
+            it.isFile && (it.name.endsWith(".am") || it.name == "conf" || it.name == "ivector")
+        } == true
+        if (!hasModelFiles) {
+            // Если файлов нет, возможно, модель не скопировалась — пытаемся ещё раз
+            modelDir.deleteRecursively()
+            copyModelFromAssets()
+        }
+        return Model(modelDir.absolutePath)
+    }
 
     private suspend fun initModel(): Boolean = withContext(Dispatchers.IO) {
         try {
-            val modelDir = File(context.filesDir, modelAssetPath)
-            // Если папка не существует или пуста — копируем
-            if (!modelDir.exists() || modelDir.listFiles()?.isEmpty() == true) {
-                copyModelFromAssets()
-            }
-            // Проверяем наличие ключевых файлов модели (например, am или conf)
-            val hasModelFiles = modelDir.listFiles()?.any {
-                it.isFile && (it.name.endsWith(".am") || it.name == "conf" || it.name == "ivector")
-            } == true
-            if (!hasModelFiles) {
-                // Если файлов нет, возможно, модель не скопировалась — пытаемся ещё раз
-                modelDir.deleteRecursively()
-                copyModelFromAssets()
-            }
-            model = Model(modelDir.absolutePath)
+            model
             true
         } catch (e: Exception) {
             e.printStackTrace()
