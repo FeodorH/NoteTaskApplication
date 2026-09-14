@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -167,6 +169,7 @@ fun SettingsScreen(
                                 ThemeMode.DARK -> "Тёмная"
                                 ThemeMode.SYSTEM -> "Системная"
                             },
+                            modifier = Modifier.align(Alignment.CenterVertically),
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -199,10 +202,12 @@ fun SettingsScreen(
                                 .size(36.dp)
                                 .clip(CircleShape)
                                 .background(Color(scheme.primary))
+                                .align(Alignment.CenterVertically)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = scheme.name,
+                            modifier = Modifier.align(Alignment.CenterVertically),
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -226,3 +231,31 @@ fun SettingsScreen(
     }
 }
 
+@Preview
+@Composable
+fun preview(){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {  }
+            .padding(vertical = 12.dp)
+    ) {
+        RadioButton(
+            selected = false,
+            onClick = { }
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .align(Alignment.CenterVertically)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = "scheme.name",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.align(Alignment.CenterVertically),
+        )
+    }
+}

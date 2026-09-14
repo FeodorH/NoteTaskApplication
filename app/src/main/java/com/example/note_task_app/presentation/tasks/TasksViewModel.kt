@@ -111,6 +111,8 @@ class TasksViewModel @Inject constructor(
     fun startVoiceInput() {
         if (voiceJob?.isActive == true) return
 
+        startAddingTask()
+
         _state.update { it.copy(isRecording = true, errorMessage = null) }
 
         voiceJob = viewModelScope.launch {
@@ -158,17 +160,28 @@ class TasksViewModel @Inject constructor(
             try {
                 val taskTitle = generateTaskFromVoice(voiceText)
                 if (!taskTitle.isNullOrBlank()) {
-                    saveTask(Task(title = taskTitle))
+                    updateNewTaskTitle(taskTitle)
                 } else {
                     _state.update { it.copy(errorMessage = "Не удалось сгенерировать задачу") }
                 }
-            } catch (_: NullPointerException) {
-                _state.update { it.copy(errorMessage = "Ошибка: задача не создана") }
-            }catch (e: IOException) {
-                _state.update { it.copy(errorMessage = "Ошибка сети: ${e.message}") }
-            }catch (e: Exception){
-                _state.update { it.copy(errorMessage = "Ошибка: ${e.message}") }
-            } finally {
+            }catch (e : Exception){
+                _state.update { it.copy(newTaskTitle = voiceText) }
+
+                var response : String = ""
+                when(e){
+                    is NullPointerException -> {
+                        response+= "Ошибка: задача не создана"
+                    }
+                    is IOException -> {
+                        response +="Ошибка сети: ${e.message}"
+                    }
+                    else -> {
+                        response += "Ошибка: ${e.message}"
+                    }
+                }
+                response += "\n[i] Сообщение введено без обработки нейросетью"
+                _state.update { it.copy(errorMessage = response) }
+            }finally {
                 _state.update { it.copy(isLoading = false) }
             }
         }
