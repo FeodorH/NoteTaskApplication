@@ -11,9 +11,12 @@ import com.example.note_task_app.domain.model.VoiceEvent
 import com.example.note_task_app.domain.service.VoiceInputService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.vosk.Model
@@ -30,39 +33,29 @@ class VoskVoiceInputService @Inject constructor(
 
     private var recognizer: Recognizer? = null
     private var audioRecord: AudioRecord? = null
+
+    @Volatile
     private var isRecording = false
 
     private val modelAssetPath = "vosk-model-small-ru-0.22"
-    private val model: Model by lazy(LazyThreadSafetyMode.SYNCHRONIZED){
+    private val voskDispatcher = Dispatchers.IO.limitedParallelism(1)
+    private val model: Model by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         provideModelPath()
     }
 
-    fun provideModelPath(): Model{
+    private fun provideModelPath(): Model {
         val modelDir = File(context.filesDir, modelAssetPath)
-        // Если папка не существует или пуста — копируем
         if (!modelDir.exists() || modelDir.listFiles()?.isEmpty() == true) {
             copyModelFromAssets()
         }
-        // Проверяем наличие ключевых файлов модели (например, am или conf)
         val hasModelFiles = modelDir.listFiles()?.any {
             it.isFile && (it.name.endsWith(".am") || it.name == "conf" || it.name == "ivector")
         } == true
         if (!hasModelFiles) {
-            // Если файлов нет, возможно, модель не скопировалась — пытаемся ещё раз
             modelDir.deleteRecursively()
             copyModelFromAssets()
         }
         return Model(modelDir.absolutePath)
-    }
-
-    private suspend fun initModel(): Boolean = withContext(Dispatchers.IO) {
-        try {
-            model
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
     }
 
     private fun copyModelFromAssets() {
@@ -77,14 +70,11 @@ class VoskVoiceInputService @Inject constructor(
         for (item in items) {
             val assetItemPath = "$assetPath/$item"
             val destFile = File(destinationDir, item)
-            // Проверяем, является ли элемент папкой
             val childItems = assetManager.list(assetItemPath)
             if (childItems?.isNotEmpty() ?: false) {
-                // Это папка
                 destFile.mkdirs()
                 copyAssetsRecursively(assetItemPath, destFile)
             } else {
-                // Это файл
                 assetManager.open(assetItemPath).use { input ->
                     FileOutputStream(destFile).use { output ->
                         input.copyTo(output)
@@ -95,72 +85,75 @@ class VoskVoiceInputService @Inject constructor(
     }
 
     override fun startListening(): Flow<VoiceEvent> = callbackFlow {
-        withContext(Dispatchers.IO) {
-            // Проверка разрешения
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                send(VoiceEvent.Error("Нет разрешения на запись аудио"))
-                close()
-                return@withContext
-            }
-
-            // Инициализация модели
-            val modelReady = initModel()
-            if (!modelReady || model == null) {
-                send(VoiceEvent.Error("Не удалось загрузить модель распознавания"))
-                close()
-                return@withContext
-            }
-
-            val sampleRate = 16000
-            val channelConfig = AudioFormat.CHANNEL_IN_MONO
-            val audioFormat = AudioFormat.ENCODING_PCM_16BIT
-            val bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
-            if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE) {
-                send(VoiceEvent.Error("Ошибка инициализации аудио"))
-                close()
-                return@withContext
-            }
-
-            audioRecord = AudioRecord(
-                MediaRecorder.AudioSource.MIC,
-                sampleRate,
-                channelConfig,
-                audioFormat,
-                bufferSize * 2
-            )
-
-            if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
-                send(VoiceEvent.Error("Не удалось инициализировать микрофон"))
-                close()
-                return@withContext
-            }
-
-            val recognizerInstance = Recognizer(model, sampleRate.toFloat())
-            recognizer = recognizerInstance
-            isRecording = true
-
-            send(VoiceEvent.Ready)
-            send(VoiceEvent.Listening)
-
-            val audioData = ByteArray(bufferSize)
+        val workerJob: Job = launch(voskDispatcher) {
+            var localRecognizer: Recognizer? = null
+            var localAudioRecord: AudioRecord? = null
 
             try {
-                audioRecord?.startRecording()
-                while (isRecording && !isClosedForSend) {
-                    val readCount = audioRecord?.read(audioData, 0, audioData.size) ?: 0
+                // 1. Проверка разрешения
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    send(VoiceEvent.Error("Нет разрешения на запись аудио"))
+                    close()
+                    return@launch
+                }
+
+                // 2. Модель
+                val loadedModel = try { model } catch (e: Exception) {
+                    send(VoiceEvent.Error("Не удалось загрузить модель распознавания"))
+                    close()
+                    return@launch
+                }
+
+                // 3. AudioRecord
+                val sampleRate = 16000
+                val channelConfig = AudioFormat.CHANNEL_IN_MONO
+                val audioFormat = AudioFormat.ENCODING_PCM_16BIT
+                val bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
+                if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE) {
+                    send(VoiceEvent.Error("Ошибка инициализации аудио"))
+                    close()
+                    return@launch
+                }
+
+                localAudioRecord = AudioRecord(
+                    MediaRecorder.AudioSource.MIC,
+                    sampleRate,
+                    channelConfig,
+                    audioFormat,
+                    bufferSize * 2
+                )
+                audioRecord = localAudioRecord
+
+                if (localAudioRecord.state != AudioRecord.STATE_INITIALIZED) {
+                    send(VoiceEvent.Error("Не удалось инициализировать микрофон"))
+                    close()
+                    return@launch
+                }
+
+                // 4. Recognizer — создаём здесь же, в том же потоке
+                localRecognizer = Recognizer(loadedModel, sampleRate.toFloat())
+                recognizer = localRecognizer
+
+                isRecording = true
+                send(VoiceEvent.Ready)
+                send(VoiceEvent.Listening)
+
+                localAudioRecord.startRecording()
+                val audioData = ByteArray(bufferSize)
+
+                while (isRecording && isActive) {
+                    val readCount = localAudioRecord.read(audioData, 0, audioData.size)
                     if (readCount > 0) {
-                        if (recognizerInstance.acceptWaveForm(audioData, readCount)) {
-                            val result = recognizerInstance.result
-                            val text = extractTextFromResult(result)
+                        if (localRecognizer.acceptWaveForm(audioData, readCount)) {
+                            val text = extractTextFromResult(localRecognizer.result)
                             if (text.isNotEmpty()) {
                                 send(VoiceEvent.FinalResult(text))
                                 break
                             }
                         } else {
-                            val partialResult = recognizerInstance.partialResult
-                            val partialText = extractTextFromPartialResult(partialResult)
+                            val partialText = extractTextFromPartialResult(localRecognizer.partialResult)
                             if (partialText.isNotEmpty()) {
                                 send(VoiceEvent.PartialResult(partialText))
                             }
@@ -170,45 +163,36 @@ class VoskVoiceInputService @Inject constructor(
             } catch (e: SecurityException) {
                 send(VoiceEvent.Error("Нет разрешения на запись аудио"))
             } catch (e: Exception) {
-                send(VoiceEvent.Error("Ошибка записи: ${e.message}"))
+                // Игнорируем CancellationException — это нормальная отмена
+                if (e !is kotlinx.coroutines.CancellationException) {
+                    send(VoiceEvent.Error("Ошибка записи: ${e.message}"))
+                }
             } finally {
-                audioRecord?.stop()
-                audioRecord?.release()
+                runCatching { localAudioRecord?.stop() }
+                runCatching { localAudioRecord?.release() }
+                runCatching { localRecognizer?.close() }
                 audioRecord = null
-                isRecording = false
-                recognizerInstance.close()
                 recognizer = null
+                isRecording = false
                 close()
             }
         }
 
         awaitClose {
-            stopListening()
+            isRecording = false
+            runCatching { audioRecord?.stop() }
+            workerJob.cancel()
         }
     }
 
     override fun stopListening() {
         isRecording = false
-        audioRecord?.stop()
-        audioRecord?.release()
-        audioRecord = null
-        recognizer?.close()
-        recognizer = null
+        runCatching { audioRecord?.stop() }
     }
 
-    private fun extractTextFromResult(json: String): String {
-        return try {
-            JSONObject(json).getString("text")
-        } catch (e: Exception) {
-            ""
-        }
-    }
+    private fun extractTextFromResult(json: String): String =
+        runCatching { JSONObject(json).getString("text") }.getOrDefault("")
 
-    private fun extractTextFromPartialResult(json: String): String {
-        return try {
-            JSONObject(json).getString("partial")
-        } catch (e: Exception) {
-            ""
-        }
-    }
+    private fun extractTextFromPartialResult(json: String): String =
+        runCatching { JSONObject(json).getString("partial") }.getOrDefault("")
 }

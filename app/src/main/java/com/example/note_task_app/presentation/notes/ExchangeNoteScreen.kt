@@ -38,6 +38,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -76,6 +80,18 @@ fun ExchangeNoteScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.errorMessage) {
+        val message = state.errorMessage
+        if (!message.isNullOrBlank()) {
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearError()
+        }
+    }
 
     // Запрос разрешений
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
@@ -96,6 +112,16 @@ fun ExchangeNoteScreen(
     ) { uri: Uri? ->
         uri?.let {
             viewModel.updateImageUri(it.toString())
+        }
+    }
+
+    val galleryPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted: Boolean ->
+        if (granted) {
+            galleryLauncher.launch("image/*")
+        } else {
+            viewModel.setError("Для галереи необходимо разрешение.")
         }
     }
 
@@ -134,17 +160,29 @@ fun ExchangeNoteScreen(
         }
     }
 
-    val recordAudioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
-
-    @Composable
-    fun ErrorMessage(error: String?) {
-        Text(
-            text = error ?: "Неизвестная ошибка",
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall
-        )
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted: Boolean ->
+        if (granted) {
+            tempCameraUri = createTempImageUri()
+            tempCameraUri?.let { uri -> cameraLauncher.launch(uri) }
+        } else {
+            viewModel.setError("Для камеры необходимо разрешение.")
+        }
     }
 
+    // Аудио
+    val recordAudioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+
+    val audioPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted: Boolean ->
+        if (granted) {
+            viewModel.startVoiceInput()
+        } else {
+            viewModel.setError("Для голосового ввода нужно разрешение на запись аудио.")
+        }
+    }
 
     // Автовыход при сохранении
     LaunchedEffect(state.isSaved) {
@@ -167,16 +205,18 @@ fun ExchangeNoteScreen(
                 actions = {
                     // Кнопка голосового ввода
                     IconButton(onClick = {
-                        if (recordAudioPermissionState.status.isGranted) {
-                            viewModel.startVoiceInput()
-                        } else {
-                            recordAudioPermissionState.launchPermissionRequest()
-                        }
+                        when {
+                            state.voiceState == VoiceState.RECORDING -> {
+                                viewModel.cancelVoiceInput()
+                            }
 
-                        if (state.voiceState == VoiceState.IDLE) {
-                            viewModel.startVoiceInput()
-                        } else {
-                            viewModel.cancelVoiceInput()
+                            recordAudioPermissionState.status.isGranted -> {
+                                viewModel.startVoiceInput()
+                            }
+
+                            else -> {
+                                audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                            }
                         }
                     }) {
                         Icon(
@@ -203,7 +243,15 @@ fun ExchangeNoteScreen(
                     Icon(Icons.Default.Check, contentDescription = "Сохранить")
                 }
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState,
+            snackbar = { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }) }
     )
     { paddingValues ->
         Column(
@@ -297,7 +345,13 @@ fun ExchangeNoteScreen(
                                     if (readImagesPermissionState.status.isGranted) {
                                         galleryLauncher.launch("image/*")
                                     } else {
-                                        readImagesPermissionState.launchPermissionRequest()
+                                        galleryPermissionLauncher.launch(
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                                Manifest.permission.READ_MEDIA_IMAGES
+                                            } else {
+                                                Manifest.permission.READ_EXTERNAL_STORAGE
+                                            }
+                                        )
                                     }
                                 },
                                 enabled = !state.isSaving
@@ -309,13 +363,14 @@ fun ExchangeNoteScreen(
 
                             Button(
                                 onClick = {
-                                    if (cameraPermissionState.status.isGranted) {
-                                        tempCameraUri = createTempImageUri()
-                                        tempCameraUri?.let { uri ->
-                                            cameraLauncher.launch(uri)
+                                    when {
+                                        cameraPermissionState.status.isGranted -> {
+                                            tempCameraUri = createTempImageUri()
+                                            tempCameraUri?.let { uri -> cameraLauncher.launch(uri) }
                                         }
-                                    } else {
-                                        cameraPermissionState.launchPermissionRequest()
+                                        else -> {
+                                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                                        }
                                     }
                                 },
                                 enabled = !state.isSaving
@@ -325,18 +380,8 @@ fun ExchangeNoteScreen(
                                 Text("Камера")
                             }
                         }
-                        if (!readImagesPermissionState.status.isGranted && readImagesPermissionState.status.shouldShowRationale) {
-                            ErrorMessage("Для выбора изображения из галереи нужно разрешение.")
-                        }
-                        if (!cameraPermissionState.status.isGranted && cameraPermissionState.status.shouldShowRationale) {
-                            ErrorMessage("Для выбора изображения из галереи нужно разрешение.")
-                        }
                     }
                 }
-            }
-
-            if (state.errorMessage != null) {
-                ErrorMessage(error = state.errorMessage)
             }
         }
     }

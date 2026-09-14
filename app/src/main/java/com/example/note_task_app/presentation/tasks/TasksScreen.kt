@@ -1,6 +1,10 @@
 package com.example.note_task_app.presentation.tasks
 
 import android.Manifest
+import android.content.Context
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,11 +37,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -63,7 +73,31 @@ fun TasksScreen(
 ) {
     val state by viewModel.state.collectAsState()
     LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Аудио
     val recordAudioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+
+    val audioPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted: Boolean ->
+        if (granted) {
+            viewModel.startVoiceInput()
+        } else {
+            viewModel.setError("Для голосового ввода нужно разрешение на запись аудио.")
+        }
+    }
+
+    LaunchedEffect(state.errorMessage) {
+        val message = state.errorMessage
+        if (!message.isNullOrBlank()) {
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearError()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -77,8 +111,9 @@ fun TasksScreen(
                             } else {
                                 if (recordAudioPermissionState.status.isGranted) {
                                     viewModel.startVoiceInput()
-                                } else {
-                                    recordAudioPermissionState.launchPermissionRequest()
+                                }
+                                else {
+                                    audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                                 }
                             }
                         }
@@ -95,7 +130,15 @@ fun TasksScreen(
             FloatingActionButton(onClick = { viewModel.startAddingTask() }) {
                 Icon(Icons.Default.Add, contentDescription = "Добавить задачу")
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState,
+            snackbar = { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -168,14 +211,6 @@ fun TasksScreen(
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
-                }
-
-                state.errorMessage != null -> {
-                    Text(
-                        text = state.errorMessage!!,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
                 }
 
                 state.tasks.isEmpty() && !state.isAddingMode -> {

@@ -100,4 +100,8 @@ class NotesViewModel @Inject constructor(
             SortOrder.OLDEST -> filtered.sortedBy { it.createdAt }
         }
     }
+
+    fun clearError(){
+        _state.update { it.copy(errorMessage = null) }
+    }
 }

@@ -198,6 +198,10 @@ class TasksViewModel @Inject constructor(
                 completed.sortedByDescending { it.createdAt }
     }
 
+    fun setError(error : String){
+        _state.update { it.copy(errorMessage = error) }
+    }
+
     fun clearError() {
         _state.update { it.copy(errorMessage = null) }
     }

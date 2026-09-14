@@ -123,6 +123,10 @@ open class ExchangeNoteViewModel @Inject constructor(
         }
     }
 
+    fun setError(error: String){
+        _state.update { it.copy(errorMessage = error) }
+    }
+
     fun clearError() {
         _state.update { it.copy(errorMessage = null) }
     }

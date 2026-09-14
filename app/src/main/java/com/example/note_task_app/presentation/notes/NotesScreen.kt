@@ -32,12 +32,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -62,6 +67,18 @@ fun NotesScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.errorMessage) {
+        val message = state.errorMessage
+        if (!message.isNullOrBlank()) {
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearError()
+        }
+    }
 
     // Загружаем заметки при первом появлении
     LaunchedEffect(Unit) {
@@ -97,7 +114,15 @@ fun NotesScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Создать заметку")
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState,
+            snackbar = { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
