@@ -128,3 +128,9 @@ tasks.withType<Test> {
     useJUnitPlatform()
     jvmArgs("-XX:+EnableDynamicAgentLoading")
 }
+
+secrets {
+    propertiesFileName = "local.properties"
+
+    defaultPropertiesFileName = "local.properties"
+}
