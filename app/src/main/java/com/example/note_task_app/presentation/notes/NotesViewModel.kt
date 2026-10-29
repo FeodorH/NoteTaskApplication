@@ -48,16 +48,10 @@ class NotesViewModel @Inject constructor(
             ) { notes, query, sortOrder ->
                 applyFiltersAndSort(notes, query, sortOrder)
             }.collect { filteredNotes ->
-                _state.update { it.copy(notes = filteredNotes, isLoading = false) }
-            }
-        }
-    }
-
-    fun loadNotes() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            getNotesFlow().collect { list ->
-                _state.update { it.copy(notes = list, isLoading = false) }
+                _state.update {
+                    it.copy(notes = filteredNotes,
+                    isLoading = false)
+                }
             }
         }
     }
@@ -79,9 +73,6 @@ class NotesViewModel @Inject constructor(
     fun deleteNote(noteId: Long) {
         viewModelScope.launch {
             deleteNoteById(noteId)
-            _state.update { state ->
-                state.copy(notes = state.notes.filter { it.id != noteId })
-            }
         }
     }
 

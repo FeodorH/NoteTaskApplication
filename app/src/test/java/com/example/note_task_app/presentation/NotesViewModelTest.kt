@@ -4,18 +4,24 @@ import com.example.note_task_app.domain.model.Note
 import com.example.note_task_app.domain.usecases.*
 import com.example.note_task_app.presentation.notes.NotesViewModel
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class NotesViewModelTest {
 
     private lateinit var viewModel: NotesViewModel
@@ -38,7 +44,7 @@ class NotesViewModelTest {
         )
         notesFlow.value = notes
         coEvery { getNotesFlow() } returns notesFlow
-        coEvery { getNoteById(any()) } returns null
+        coEvery { getNoteById(1L) } returns notes[0]
         coEvery { createNote(any()) } returns notes[0]
         coEvery { deleteNoteById(any()) } returns Unit
         coEvery { deleteAllNotes() } returns Unit
@@ -82,5 +88,27 @@ class NotesViewModelTest {
 
         val newState = viewModel.state.value
         assertEquals("A note", newState.notes.first().title)
+    }
+
+    @Test
+    fun `createNote should call use case`() = runTest(testDispatcher) {
+        viewModel.createNote(Note(id = 1, title = "A note", content = "aaa", createdAt = 1000))
+        advanceUntilIdle()
+        coVerify { createNote(any()) }
+    }
+
+    @Test
+    fun `deleteNote should call use case`() = runTest(testDispatcher) {
+        viewModel.deleteNote(1L)
+        advanceUntilIdle()
+        coVerify { deleteNoteById(1L) }
+    }
+
+    @Test
+    fun `toggleDeleteMode should switch flag`() = runTest(testDispatcher) {
+        viewModel.toggleDeleteMode()
+        assertTrue(viewModel.state.value.isDeleteMode)
+        viewModel.toggleDeleteMode()
+        assertFalse(viewModel.state.value.isDeleteMode)
     }
 }

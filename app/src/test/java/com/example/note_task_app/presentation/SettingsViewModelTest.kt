@@ -13,6 +13,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
     private lateinit var viewModel: SettingsViewModel
     private val getThemeModeUseCase: GetThemeModeUseCase = mockk()
@@ -37,7 +39,7 @@ class SettingsViewModelTest {
     private val colorSchemeFlow = MutableStateFlow(AppColorScheme.Default)
     private val testDispatcher = StandardTestDispatcher()
 
-    @BeforeEach// TODO
+    @BeforeEach
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         coEvery { getThemeModeUseCase() } returns themeModeFlow

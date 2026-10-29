@@ -8,6 +8,7 @@ import com.example.note_task_app.domain.usecases.GetNoteByIdUseCase
 import com.example.note_task_app.presentation.notes.ExchangeNoteViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ExchangeNoteViewModelTest {
 
     private lateinit var viewModel: ExchangeNoteViewModel
@@ -43,8 +45,8 @@ class ExchangeNoteViewModelTest {
         coEvery { createNote(any()) } returns Note(1L, "")
 
         // Заглушки для VoiceInputService
-        coEvery { voiceInputService.startListening() } returns emptyFlow()
-        coEvery { voiceInputService.stopListening() } returns Unit
+        every { voiceInputService.startListening() } returns emptyFlow()
+        every { voiceInputService.stopListening() } returns Unit
 
         viewModel = ExchangeNoteViewModel(
             getNoteById = getNoteById,
@@ -74,7 +76,6 @@ class ExchangeNoteViewModelTest {
         coVerify(exactly = 0) { createNote(any()) }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `saveNote with valid title should call createNote and set isSaved`() = runTest(testDispatcher) {
         // given

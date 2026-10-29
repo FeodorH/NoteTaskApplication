@@ -83,10 +83,6 @@ fun NotesScreen(
         }
     }
 
-    // Загружаем заметки при первом появлении
-    LaunchedEffect(Unit) {
-        viewModel.loadNotes()
-    }
     Scaffold(
         topBar = {
             TopAppBar(

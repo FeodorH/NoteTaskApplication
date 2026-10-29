@@ -24,8 +24,8 @@ class TaskRepositoryImpl @Inject constructor(
 
 
     override suspend fun saveTask(task: Task) = withContext(Dispatchers.IO) {
-        taskDAO.insertTask(task.toEntity())
-        Unit
+        val newId = taskDAO.insertTask(task.toEntity())
+        task.copy(id = newId)
     }
 
     override suspend fun updateTaskStatus(id: Long, isCompleted: Boolean) =

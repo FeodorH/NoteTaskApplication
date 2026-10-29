@@ -2,6 +2,7 @@ package com.example.note_task_app.presentation
 
 import com.example.note_task_app.data.service.VoskVoiceInputService
 import com.example.note_task_app.domain.model.Task
+import com.example.note_task_app.domain.service.VoiceInputService
 import com.example.note_task_app.domain.usecases.*
 import com.example.note_task_app.presentation.tasks.TasksViewModel
 import com.example.note_task_app.presentation.tasks.models.TaskFilter
@@ -9,6 +10,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class TasksViewModelTest {
 
     private lateinit var viewModel: TasksViewModel
@@ -27,7 +30,7 @@ class TasksViewModelTest {
     private val saveTask: CreateTaskUseCase = mockk()
     private val deleteTask: DeleteTaskUseCase = mockk()
     private val updateTaskStatus: UpdateTaskStatusUseCase = mockk()
-    private val voiceInputService: VoskVoiceInputService = mockk()
+    private val voiceInputService: VoiceInputService = mockk()
     private val generateTaskUsingByVoiceUseCase: GigaChatGenerateTaskUsingByVoiceUseCase = mockk()
 
     private val tasksFlow = MutableStateFlow<List<Task>>(emptyList())
@@ -43,7 +46,7 @@ class TasksViewModelTest {
         )
         tasksFlow.value = tasks
         coEvery { getTasksFlow() } returns tasksFlow
-        coEvery { saveTask(any()) } returns Unit
+        coEvery { saveTask(any()) } returns Task(id = 1, title = "Task 1", isCompleted = false, createdAt = 1000)
         coEvery { deleteTask(any()) } returns Unit
         coEvery { updateTaskStatus(any(), any()) } returns Unit
         coEvery { voiceInputService.startListening() } returns flowOf()
