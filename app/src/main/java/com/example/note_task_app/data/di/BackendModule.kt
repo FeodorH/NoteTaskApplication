@@ -42,7 +42,7 @@ object BackendModule {
         val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
 
         return Retrofit.Builder()
-            .baseUrl("http://10.80.219.211:8001/")
+            .baseUrl("http://localhost:8001/")
             .client(okHttpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
